@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.libaray_manager_system.mapper.UserMapper">
+
+    <!-- 更新密码 -->
+    <update id="UpdatePassword">
+        UPDATE sys_user
+        SET password = #{newPassword}
+        WHERE username = #{username}
+    </update>
+
+    <!-- 获取所有用户 -->
+    <select id="GetUsers" resultType="org.libaray_manager_system.pojo.vo.UserVo">
+        SELECT * FROM sys_user
+        <where>
+            <if test="userSelectDto.username != null and userSelectDto.username != ''">
+                AND username LIKE CONCAT('%', #{userSelectDto.username}, '%')
+            </if>
+            <if test="userSelectDto.realName != null and userSelectDto.realName != ''">
+                AND real_name LIKE CONCAT('%', #{userSelectDto.realName}, '%')
+            </if>
+            <if test="userSelectDto.role != null and userSelectDto.role != ''">
+                AND role = #{userSelectDto.role}
+            </if>
+            <if test="userSelectDto.status != null">
+                AND status = #{userSelectDto.status}
+            </if>
+        </where>
+        ORDER BY id
+        LIMIT #{startIndex}, #{userSelectDto.pageSize}
+    </select>
+    <!-- 获取用户详情(根据id)  -->
+    <select id="GetUserById" resultType="org.libaray_manager_system.pojo.vo.UserVo">
+        SELECT * FROM sys_user WHERE id = #{id}
+    </select>
+    <!-- 更新用户信息(根据id) -->
+    <update id="UpdateById">
+        UPDATE sys_user
+        SET real_name = #{userVo.realName}, role = #{userVo.role}, status = #{userVo.status}, phone = #{userVo.phone},email = #{userVo.email}
+        WHERE id = #{id}
+    </update>
+
+<!--   根据用户名查询用户是否存在-->
+    <select id="GetUserByUsername" resultType="org.libaray_manager_system.pojo.entity.sysUser">
+        SELECT * FROM sys_user WHERE username = #{username}
+    </select>
+<!--   根据真实姓名查询用户是否存在-->
+    <select id="GetUserByRealName" resultType="org.libaray_manager_system.pojo.entity.sysUser">
+        SELECT * FROM sys_user WHERE real_name = #{realName}
+    </select>
+    <!-- 新增用户 -->
+    <insert id="Insert" parameterType="org.libaray_manager_system.pojo.dto.UserSelectDto">
+        INSERT INTO sys_user (username, real_name, password, role, status, phone, email)
+        VALUES (#{username}, #{realName}, #{password}, #{role}, #{status}, #{phone}, #{email})
+    </insert>
+
+<!--   更新用户status状态 -->
+    <update id="UpdateStatus">
+        UPDATE sys_user
+        SET status = #{status}
+        WHERE id = #{id}
+    </update>
+    <!-- 删除用户（根据id删除） -->
+    <delete id="DeleteUser">
+        DELETE FROM sys_user WHERE id = #{id}
+    </delete>
+    <!-- 删除用户（根据用户名删除） -->
+    <delete id="DeleteByUsername">
+        DELETE FROM sys_user WHERE username = #{username}
+    </delete>
+<!--   获取管理员用户数量 -->
+    <select id="GetAdminUserCount" resultType="java.lang.Integer">
+        SELECT COUNT(*) FROM sys_user WHERE role = 'ADMIN'
+    </select>
+    <!--   获取所有用户数量 -->
+    <select id="GetUserCount" resultType="java.lang.Integer">
+        SELECT COUNT(*) FROM sys_user
+    </select>
+</mapper>

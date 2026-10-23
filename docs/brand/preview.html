@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>星河图书 · LOGO 定稿与规范</title>
+<style>
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  --font:"MiSans VF","HarmonyOS Sans SC","MiSans","Source Han Sans SC","Noto Sans SC",
+         "PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+  --mono:"JetBrains Mono","SF Mono","Cascadia Mono",Consolas,monospace;
+  --ink:#000; --ink-2:#3d3d3d; --ink-3:#7a7a7a; --ink-4:#9a9a9a;
+  --paper:#fff; --canvas:#f7f7f7; --subtle:#fafafa;
+  --line:#ededed; --line-2:#e2e2e2; --line-hover:#c9c9c9; --gridline:rgba(0,0,0,.10);
+  font-family:var(--font); font-size:13.5px; line-height:1.6; color:var(--ink);
+  background:var(--canvas); -webkit-font-smoothing:antialiased;
+}
+body.theme-dark{
+  --ink:#fff; --ink-2:#d4d4d4; --ink-3:#9a9a9a; --ink-4:#7a7a7a;
+  --paper:#111; --canvas:#000; --subtle:#171717;
+  --line:#242424; --line-2:#2e2e2e; --line-hover:#4a4a4a; --gridline:rgba(255,255,255,.14);
+}
+.mono{font-family:var(--mono);letter-spacing:0}
+.wrap{max-width:1320px;margin:0 auto;padding:44px 32px 80px;display:flex;flex-direction:column;gap:26px}
+
+/* ---------- 页头 ---------- */
+.top{display:flex;gap:40px;align-items:flex-start;flex-wrap:wrap}
+.top-l{flex:1 1 460px;min-width:300px}
+.kicker{font-size:10.5px;color:var(--ink-4);letter-spacing:.14em}
+h1{margin:8px 0 0;font-size:30px;font-weight:600;letter-spacing:-.03em;text-wrap:balance}
+.lede{margin:10px 0 0;font-size:13.5px;color:var(--ink-2);max-width:62ch;text-wrap:pretty}
+.tools{flex:0 0 auto;display:flex;flex-direction:column;gap:10px;padding-top:6px}
+.seg{display:flex;border:1px solid var(--line-2);border-radius:5px;overflow:hidden}
+.seg .lab{font-size:10.5px;color:var(--ink-4);padding:0 9px;display:flex;align-items:center;
+  border-right:1px solid var(--line-2);background:var(--subtle);letter-spacing:.04em}
+.seg button{font:inherit;font-size:12px;color:var(--ink-3);background:none;border:0;border-right:1px solid var(--line-2);
+  padding:5px 12px;cursor:pointer;transition:background 120ms cubic-bezier(.4,0,.2,1),color 120ms}
+.seg button:last-child{border-right:0}
+.seg button:hover{background:var(--subtle);color:var(--ink)}
+.seg button.on{background:var(--ink);color:var(--paper)}
+
+/* ---------- 设计前提 ---------- */
+.rail{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1px;
+  background:var(--line-2);border:1px solid var(--line-2);border-radius:8px;overflow:hidden}
+.rail div{background:var(--paper);padding:11px 14px}
+.rail .k{font-size:10.5px;color:var(--ink-4);letter-spacing:.06em}
+.rail .v{font-size:12.5px;color:var(--ink-2);margin-top:2px}
+
+/* ---------- 方案卡（已随定稿收档，样式保留给 .sz / .lock 复用） ---------- */
+.mk{width:100%;height:100%;display:block}
+.sz{display:flex;flex-direction:column;align-items:center;gap:7px}
+.szbox{width:var(--n);height:var(--n);position:relative}
+.szlab{font-size:9.5px;color:var(--ink-4)}
+/* 构造网格：64 单位画布切 8×8 格，格子边长随标记尺寸走，安全区 = 四周 1/16 */
+.bigmark::before{content:"";position:absolute;inset:0;opacity:0;transition:opacity 120ms;
+  background-image:linear-gradient(to right,var(--gridline) 1px,transparent 1px),
+                   linear-gradient(to bottom,var(--gridline) 1px,transparent 1px);
+  background-size:calc(var(--n)/8) calc(var(--n)/8);
+  outline:1px dashed var(--line-hover);outline-offset:calc(var(--n)/16)}
+body.gridon .bigmark::before{opacity:1}
+.bigmark svg{position:relative;z-index:1}
+.lock{display:flex;align-items:center;gap:var(--gap,11px)}
+.lock-mark{width:var(--m,30px);height:var(--m,30px);flex:none}
+.lock-words{display:flex;flex-direction:column;line-height:1.22;min-width:0}
+.lock-cn{font-size:var(--cn,19px);font-weight:600;letter-spacing:-.02em}
+.lock-en{font-size:var(--en,9.5px);color:var(--ink-4);letter-spacing:.15em;margin-top:3px;font-family:var(--mono)}
+body.word-cn .lock-en{display:none}
+body.word-en .lock-cn{display:none}
+body.word-en .lock-en{font-size:15px;font-weight:600;letter-spacing:.02em;color:var(--ink);margin-top:0;font-family:var(--font)}
+
+/* ---------- 应用验证 ---------- */
+.apps{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px;align-items:start}
+.panel{background:var(--paper);border:1px solid var(--line-2);border-radius:8px;padding:16px;
+  display:flex;flex-direction:column;gap:14px}
+.cap{font-size:10px;color:var(--ink-4);letter-spacing:.12em}
+.side{border:1px solid var(--line-2);border-radius:8px;overflow:hidden;background:var(--paper);width:100%;max-width:260px}
+.side-inner{padding:18px 12px 14px;display:flex;flex-direction:column;gap:22px}
+.brand{display:flex;align-items:center;gap:10px;padding:0 6px}
+.brand-mark{width:28px;height:28px;flex:none;display:block}
+.brand-text{display:flex;flex-direction:column;line-height:1.25;min-width:0}
+.brand-name{font-size:14px;font-weight:600;letter-spacing:-.01em}
+.brand-sub{font-size:10.5px;color:var(--ink-4);letter-spacing:.04em;font-family:var(--mono)}
+.navs{display:flex;flex-direction:column}
+.nav-label{font-size:11px;color:var(--ink-4);letter-spacing:.06em;padding:0 8px 8px}
+.nav-item{display:flex;align-items:center;gap:8px;padding:7px 8px;font-size:13.5px;color:var(--ink-3);
+  border-left:2px solid transparent}
+.nav-item.is-active{color:var(--ink);font-weight:500;border-left-color:var(--ink)}
+.soon{margin-left:auto;font-size:10.5px;color:var(--ink-4);font-family:var(--mono)}
+.tabbar{display:flex;align-items:flex-end;gap:4px;background:var(--canvas);border:1px solid var(--line-2);
+  border-bottom:0;border-radius:8px 8px 0 0;padding:7px 7px 0}
+.tab{display:flex;align-items:center;gap:8px;background:var(--paper);border:1px solid var(--line-2);
+  border-bottom:0;border-radius:6px 6px 0 0;padding:6px 10px;font-size:12px;color:var(--ink-2)}
+.tab-fav{width:16px;height:16px;flex:none}
+.tab-x{color:var(--ink-4);font-size:11px;margin-left:2px}
+.tab-plus{color:var(--ink-4);font-size:14px;padding:0 8px 6px}
+.tabpage{border:1px solid var(--line-2);border-top:0;border-radius:0 0 8px 8px;height:64px;background:var(--paper)}
+.strip{background:#000;border-radius:8px;padding:24px 18px;display:flex;justify-content:space-around;
+  align-items:flex-start;gap:14px;flex-wrap:wrap}
+.strip .item{display:flex;flex-direction:column;align-items:center;gap:9px;color:#fff}
+.strip .mk{width:40px;height:40px}
+.strip .lbl{font-size:9.5px;color:#7a7a7a;font-family:var(--mono)}
+.foot{border-top:1px solid var(--line-2);padding-top:18px;display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px}
+.foot h3{margin:0 0 8px;font-size:12px;font-weight:600;letter-spacing:.02em}
+.foot p{margin:0;font-size:12px;color:var(--ink-3);line-height:1.75}
+.foot code{font-family:var(--mono);font-size:11.5px;background:var(--subtle);border:1px solid var(--line);
+  border-radius:4px;padding:1px 4px;color:var(--ink-2)}
+
+.finalwrap{border:1px solid var(--ink);border-radius:8px;background:var(--paper);overflow:hidden}
+.finalhead{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;padding:16px 18px;
+  border-bottom:1px solid var(--line-2)}
+.badge{font-size:10px;font-family:var(--mono);letter-spacing:.1em;background:var(--ink);
+  color:var(--paper);border-radius:4px;padding:2px 7px}
+.finalhead h2{margin:0;font-size:18px;font-weight:600;letter-spacing:-.02em}
+.finalhead p{margin:0;font-size:12.5px;color:var(--ink-3);flex:1 1 320px;min-width:200px;text-wrap:pretty}
+.specgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1px;
+  background:var(--line-2)}
+.specgrid .panel{border:0;border-radius:0;background:var(--paper)}
+.ladder{display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap;padding:6px 0}
+.clearwrap{display:flex;align-items:center;gap:22px;flex-wrap:wrap}
+.clearbox{position:relative;width:128px;height:128px;flex:none;border:1px dashed var(--line-hover);
+  display:flex;align-items:center;justify-content:center}
+.clearbox .inner{width:64px;height:64px}
+.clearnote{font-size:11.5px;color:var(--ink-3);line-height:1.8}
+.clearnote b{font-weight:600;color:var(--ink)}
+.clearnote code{font-family:var(--mono);font-size:11px;background:var(--subtle);
+  border:1px solid var(--line);border-radius:4px;padding:1px 4px;color:var(--ink-2)}
+.lockrow{display:flex;align-items:center;gap:28px;flex-wrap:wrap;padding:4px 0}
+.others h3{margin:0;font-size:13px;font-weight:600;letter-spacing:.02em}
+.others>*+*{margin-top:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div class="top-l">
+      <div class="kicker mono">LIBRARY MANAGER SYSTEM · BRAND IDENTITY</div>
+      <h1>星河图书 · LOGO 定稿</h1>
+      <p class="lede">方向已定为 <b>D 书架星芒</b>，纯黑白、无品牌色，与项目现有的 B 版设计系统
+      （灰阶 / 1px 发丝线 / 无阴影 / 圆角 4·5·8）严格一致。下面是尺寸阶梯、留白规则、
+      小尺寸简版，以及它在侧栏、标签页、深色底上的实际表现。</p>
+    </div>
+    <div class="tools">
+      <div class="seg" data-group="theme"><span class="lab mono">底色</span><button data-v="light">浅底</button><button data-v="dark">深底</button></div>
+      <div class="seg" data-group="word"><span class="lab mono">字标</span><button data-v="cn">中文</button><button data-v="both">中英</button><button data-v="en">英文</button></div>
+      <div class="seg" data-group="grid"><span class="lab mono">网格</span><button data-v="off">关</button><button data-v="on">开</button></div>
+    </div>
+  </header>
+
+  <section class="rail">
+    <div><div class="k mono">COLOR</div><div class="v">纯黑白灰，无品牌色</div></div>
+    <div><div class="k mono">MIN SIZE</div><div class="v">主标 24px / 简版 16px</div></div>
+    <div><div class="k mono">CLEAR SPACE</div><div class="v">四周 ≥ 0.5 × 标记高度</div></div>
+    <div><div class="k mono">TECHNIQUE</div><div class="v">负空间镂空，单色文件</div></div>
+  </section>
+
+  <section class="finalwrap">
+    <div class="finalhead">
+      <span class="badge mono">定稿</span>
+      <h2>D · 书架星芒</h2>
+      <p>两本立着、一本向左斜靠着，顶上一颗星——「书架」是这个方案唯一要说的东西。 选中理由：具象程度最高，不用解释就能认出是「书架」；整体是负空间构成，
+      单色文件在深浅底之间直接通用，不需要第二套。</p>
+    </div>
+    <div class="specgrid">
+      <div class="panel">
+        <div class="cap mono">主标 · 尺寸阶梯</div>
+        <div class="ladder"><div class="sz"><div class="szbox bigmark" style="--n:128px"><svg class="mk" viewBox="0 0 64 64" fill="currentColor" aria-hidden="true"><g transform="translate(-0.94 1.25)"><path fill-rule="evenodd" d="M13.00 28.00 H18.00 A2.00 2.00 0 0 1 20.00 30.00 V52.00 A2.00 2.00 0 0 1 18.00 54.00 H13.00 A2.00 2.00 0 0 1 11.00 52.00 V30.00 A2.00 2.00 0 0 1 13.00 28.00 Z M27.00 22.00 H32.00 A2.00 2.00 0 0 1 34.00 24.00 V52.00 A2.00 2.00 0 0 1 32.00 54.00 H27.00 A2.00 2.00 0 0 1 25.00 52.00 V24.00 A2.00 2.00 0 0 1 27.00 22.00 Z"/><g transform="translate(0 -1.09) rotate(-14 50.5 54)"><path d="M48.00 24.00 H53.00 A2.00 2.00 0 0 1 55.00 26.00 V52.00 A2.00 2.00 0 0 1 53.00 54.00 H48.00 A2.00 2.00 0 0 1 46.00 52.00 V26.00 A2.00 2.00 0 0 1 48.00 24.00 Z"/></g><path d="M48.00 7.50 C48.27 10.25 49.10 11.62 53.50 13.00 C49.10 14.38 48.27 15.75 48.00 18.50 C47.73 15.75 46.90 14.38 42.50 13.00 C46.90 11.62 47.73 10.25 48.00 7.50 Z"/></g></svg></div><span class="szlab mono">128</span></div><div class="sz"><div class="szbox" style="--n:96px"><svg class="mk" viewBox="0 0 64 64" fill="currentColor" aria-hidden="true"><g transform="translate(-0.94 1.25)"><path fill-rule="evenodd" d="M13.00 28.00 H18.00 A2.00 2.00 0 0 1 20.00 30.00 V52.00 A2.00 2.00 0 0 1 18.00 54.00 H13.00 A2.00 2.00 0 0 1 11.00 52.00 V30.00 A2.00 2.00 0 0 1 13.00 28.00 Z M27.00 22.00 H32.00 A2.00 2.00 0 0 1 34.00 24.00 V52.00 A2.00 2.00 0 0 1 32.00 54.00 H27.00 A2.00 2.00 0 0 1 25.00 52.00 V24.00 A2.00 2.00 0 0 1 27.00 22.00 Z"/><g transform="translate(0 -1.09) rotate(-14 50.5 54)"><path d="M48.00 24.00 H53.00 A2.00 2.00 0 0 1 55.00 26.00 V52.00 A2.00 2.00 0 0 1 53.00 54.00 H48.00 A2.00 2.00 0 0 1 46.00 52.00 V26.00 A2.00 2.00 0 0 1 48.00 24.00 Z"/></g><path d="M48.00 7.50 C48.27 10.25 49.10 11.62 53.50 13.00 C49.10 14.38 48.27 15.75 48.00 18.50 C47.73 15.75 46.90 14.38 42.50 13.00 C46.90 11.62 47.73 10.25 48.00 7.50 Z"/></g></svg></div><span class="szlab mono">96</span></div><div class="sz"><div class="szbox" style="--n:64px"><svg class="mk" viewBox="0 0 64 64" fill="currentColor" aria-hidden="true"><g transform="translate(-0.94 1.25)"><path fill-rule="evenodd" d="M13.00 28.00 H18.00 A2.00 2.00 0 0 1 20.00 30.00 V52.00 A2.00 2.00 0 0 1 18.00 54.00 H13.00 A2.00 2.00 0 0 1 11.00 52.00 V30.00 A2.00 2.00 0 0 1 13.00 28.00 Z M27.00 22.00 H32.00 A2.00 2.00 0 0 1 34.00 24.00 V52.00 A2.00 2.00 0 0 1 32.00 54.00 H27.00 A2.00 2.00 0 0 1 25.00 52.00 V24.00 A2.00 2.00 0 0 1 27.00 22.00 Z"/><g transform="translate(0 -1.09) rotate(-14 50.5 54)"><path d="M48.00 24.00 H53.00 A2.00 2.00 0 0 1 55.00 26.00 V52.00 A2.00 2.00 0 0 1 53.00 54.00 H48.00 A2.00 2.00 0 0 1 46.00 52.00 V26.00 A2.00 2.00 0 0 1 48.00 24.00 Z"/></g><path d="M48.00 7.50 C48.27 10.25 49.10 11.62 53.50 13.00 C49.10 14.38 48.27 15.75 48.00 18.50 C47.73 15.75 46.90 14.38 42.50 13.00 C46.90 11.62 47.73 10.25 48.00 7.50 Z"/></g></svg></div><span class="szlab mono">64</span></div><div class="sz"><div class="szbox" style="--n:48px"><svg class="mk" viewBox="0 0 64 64" fill="currentColor" aria-hidden="true"><g transform="translate(-0.94 1.25)"><path fill-rule="evenodd" d="M13.00 28.00 H18.00 A2.00 2.00 0 0 1 20.00 30.00 V52.00 A2.00 2.00 0 0 1 18.00 54.00 H13.00 A2.00 2.00 0 0 1 11.00 52.00 V30.00 A2.00 2.00 0 0 1 13.00 28.00 Z M27.00 22.00 H32.00 A2.00 2.00 0 0 1 34.00 24.00 V52.00 A2.00 2.00 0 0 1 32.00 54.00 H27.00 A2.00 2.00 0 0 1 25.00 52.00 V24.00 A2.00 2.00 0 0 1 27.00 22.00 Z"/><g transform="translate(0 -1.09) rotate(-14 50.5 54)"><path d="M48.00 24.00 H53.00 A2.00 2.00 0 0 1 55.00 26.00 V52.00 A2.00 2.00 0 0 1 53.00 54.00 H48.00 A2.00 2.00 0 0 1 46.00 52.00 V26.00 A2.00 2.00 0 0 1 48.00 24.00 Z"/></g><path d="M48.00 7.50 C48.27 10.25 49.10 11.62 53.50 13.00 C49.10 14.38 48.27 15.75 48.00 18.50 C47.73 15.75 46.90 14.38 42.50 13.00 C46.90 11.62 47.73 10.25 48.00 7.50 Z"/></g></svg></div><span class="szlab mono">48</span></div><div class="sz"><div class="szbox" style="--n:32px"><svg class="mk" viewBox="0 0 64 64" fill="currentColor" aria-hidden="true"><g transform="translate(-0.94 1.25)"><path fill-rule="evenodd" d="M13.00 28.00 H18.00 A2.00 2.00 0 0 1 20.00 30.00 V52.00 A2.00 2.00 0 0 1 18.00 54.00 H13.00 A2.00 2.00 0 0 1 11.00 52.00 V30.00 A2.00 2.00 0 0 1 13.00 28.00 Z M27.00 22.00 H32.00 A2.00 2.00 0 0 1 34.00 24.00 V52.00 A2.00 2.00 0 0 1 32.00 54.00 H27.00 A2.00 2.00 0 0 1 25.00 52.00 V24.00 A2.00 2.00 0 0 1 27.00 22.00 Z"/><g transform="translate(0 -1.09) rotate(-14 50.5 54)"><path d="M48.00 24.00 H53.00 A2.00 2.00 0 0 1 55.00 26.00 V52.00 A2.00 2.00 0 0 1 53.00 54.00 H48.00 A2.00 2.00 0 0 1 46.00 52.00 V26.00 A2.00 2.00 0 0 1 48.00 24.00 Z"/></g><path d="M48.00 7.50 C48.27 10.25 49.10 11.62 53.50 13.00 C49.10 14.38 48.27 15.75 48.00 18.50 C47.73 15.75 46.90 14.38 42.50 13.00 C46.90 11.62 47.73 10.25 48.00 7.50 Z"/></g></svg></div><span class="szlab mono">32</span></div><div class="sz"><div class="szbox" style="--n:24px"><svg class="mk" viewBox="0 0 64 64" fill="currentColor" aria-hidden="true"><g transform="translate(-0.94 1.25)"><path fill-rule="evenodd" d="M13.00 28.00 H18.00 A2.00 2.00 0 0 1 20.00 30.00 V52.00 A2.00 2.00 0 0 1 18.00 54.00 H13.00 A2.00 2.00 0 0 1 11.00 52.00 V30.00 A2.00 2.00 0 0 1 13.00 28.00 Z M27.00 22.00 H32.00 A2.00 2.00 0 0 1 34.00 24.00 V52.00 A2.00 2.00 0 0 1 32.00 54.00 H27.00 A2.00 2.00 0 0 1 25.00 52.00 V24.00 A2.00 2.00 0 0 1 27.00 22.00 Z"/><g transform="translate(0 -1.09) rotate(-14 50.5 54)"><path d="M48.00 24.00 H53.00 A2.00 2.00 0 0 1 55.00 26.00 V52.00 A2.00 2.00 0 0 1 53.00 54.00 H48.00 A2.00 2.00 0 0 1 46.00 52.00 V26.00 A2.00 2.00 0 0 1 48.00 24.00 Z"/></g><path d="M48.00 7.50 C48.27 10.25 49.10 11.62 53.50 13.00 C49.10 14.38 48.27 15.75 48.00 18.50 C47.73 15.75 46.90 14.38 42.50 13.00 C46.90 11.62 47.73 10.25 48.00 7.50 Z"/></g></svg></div><span class="szlab mono">24</span></div><div class="sz"><div class="szbox" style="--n:16px"><svg class="mk" viewBox="0 0 64 64" fill="currentColor" aria-hidden="true"><g transform="translate(-0.94 1.25)"><path fill-rule="evenodd" d="M13.00 28.00 H18.00 A2.00 2.00 0 0 1 20.00 30.00 V52.00 A2.00 2.00 0 0 1 18.00 54.00 H13.00 A2.00 2.00 0 0 1 11.00 52.00 V30.00 A2.00 2.00 0 0 1 13.00 28.00 Z M27.00 22.00 H32.00 A2.00 2.00 0 0 1 34.00 24.00 V52.00 A2.00 2.00 0 0 1 32.00 54.00 H27.00 A2.00 2.00 0 0 1 25.00 52.00 V24.00 A2.00 2.00 0 0 1 27.00 22.00 Z"/><g transform="translate(0 -1.09) rotate(-14 50.5 54)"><path d="M48.00 24.00 H53.00 A2.00 2.00 0 0 1 55.00 26.00 V52.00 A2.00 2.00 0 0 1 53.00 54.00 H48.00 A2.00 2.00 0 0 1 46.00 52.00 V26.00 A2.00 2.00 0 0 1 48.00 24.00 Z"/></g><path d="M48.00 7.50 C48.27 10.25 49.10 11.62 53.50 13.00 C49.10 14.38 48.27 15.75 48.00 18.50 C47.73 15.75 46.90 14.38 42.50 13.00 C46.90 11.62 47.73 10.25 48.00 7.50 Z"/></g></svg></div><span class="szlab mono">16</span></div></div>
+        <div class="clearnote">主标最小 <b>24px</b>，再小请换简版。</div>
+      </div>
+      <div class="panel">
+        <div class="cap mono">留白 · 安全区</div>
+        <div class="clearwrap">
+          <div class="clearbox"><div class="inner"><svg class="mk" viewBox="0 0 64 64" fill="currentColor" aria-hidden="true"><g transform="translate(-0.94 1.25)"><path fill-rule="evenodd" d="M13.00 28.00 H18.00 A2.00 2.00 0 0 1 20.00 30.00 V52.00 A2.00 2.00 0 0 1 18.00 54.00 H13.00 A2.00 2.00 0 0 1 11.00 52.00 V30.00 A2.00 2.00 0 0 1 13.00 28.00 Z M27.00 22.00 H32.00 A2.00 2.00 0 0 1 34.00 24.00 V52.00 A2.00 2.00 0 0 1 32.00 54.00 H27.00 A2.00 2.00 0 0 1 25.00 52.00 V24.00 A2.00 2.00 0 0 1 27.00 22.00 Z"/><g transform="translate(0 -1.09) rotate(-14 50.5 54)"><path d="M48.00 24.00 H53.00 A2.00 2.00 0 0 1 55.00 26.00 V52.00 A2.00 2.00 0 0 1 53.00 54.00 H48.00 A2.00 2.00 0 0 1 46.00 52.00 V26.00 A2.00 2.00 0 0 1 48.00 24.00 Z"/></g><path d="M48.00 7.50 C48.27 10.25 49.10 11.62 53.50 13.00 C49.10 14.38 48.27 15.75 48.00 18.50 C47.73 15.75 46.90 14.38 42.50 13.00 C46.90 11.62 47.73 10.25 48.00 7.50 Z"/></g></svg></div></div>
+          <div class="clearnote">四周留白 ≥ <b>0.5 × 标记高度</b>。<br>
+          28px 的侧栏标，四周至少空 14px；<br>低于这个值就会和相邻文字黏在一起。</div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="cap mono">小尺寸简版 · ≤20px</div>
+        <div class="ladder"><div class="sz"><div class="szbox" style="--n:64px"><svg class="mk" viewBox="0 0 64 64" fill="currentColor" aria-hidden="true"><g transform="translate(-0.935 -6.545) translate(32.935 38.545) scale(1.3) translate(-32.935 -38.545)"><path fill-rule="evenodd" d="M13.00 28.00 H18.00 A2.00 2.00 0 0 1 20.00 30.00 V52.00 A2.00 2.00 0 0 1 18.00 54.00 H13.00 A2.00 2.00 0 0 1 11.00 52.00 V30.00 A2.00 2.00 0 0 1 13.00 28.00 Z M27.00 22.00 H32.00 A2.00 2.00 0 0 1 34.00 24.00 V52.00 A2.00 2.00 0 0 1 32.00 54.00 H27.00 A2.00 2.00 0 0 1 25.00 52.00 V24.00 A2.00 2.00 0 0 1 27.00 22.00 Z"/><g transform="translate(0 -1.09) rotate(-14 50.5 54)"><path d="M48.00 24.00 H53.00 A2.00 2.00 0 0 1 55.00 26.00 V52.00 A2.00 2.00 0 0 1 53.00 54.00 H48.00 A2.00 2.00 0 0 1 46.00 52.00 V26.00 A2.00 2.00 0 0 1 48.00 24.00 Z"/></g></g></svg></div><span class="szlab mono">64</span></div><div class="sz"><div class="szbox" style="--n:48px"><svg class="mk" viewBox="0 0 64 64" fill="currentColor" aria-hidden="true"><g transform="translate(-0.935 -6.545) translate(32.935 38.545) scale(1.3) translate(-32.935 -38.545)"><path fill-rule="evenodd" d="M13.00 28.00 H18.00 A2.00 2.00 0 0 1 20.00 30.00 V52.00 A2.00 2.00 0 0 1 18.00 54.00 H13.00 A2.00 2.00 0 0 1 11.00 52.00 V30.00 A2.00 2.00 0 0 1 13.00 28.00 Z M27.00 22.00 H32.00 A2.00 2.00 0 0 1 34.00 24.00 V52.00 A2.00 2.00 0 0 1 32.00 54.00 H27.00 A2.00 2.00 0 0 1 25.00 52.00 V24.00 A2.00 2.00 0 0 1 27.00 22.00 Z"/><g transform="translate(0 -1.09) rotate(-14 50.5 54)"><path d="M48.00 24.00 H53.00 A2.00 2.00 0 0 1 55.00 26.00 V52.00 A2.00 2.00 0 0 1 53.00 54.00 H48.00 A2.00 2.00 0 0 1 46.00 52.00 V26.00 A2.00 2.00 0 0 1 48.00 24.00 Z"/></g></g></svg></div><span class="szlab mono">48</span></div><div class="sz"><div class="szbox" style="--n:32px"><svg class="mk" viewBox="0 0 64 64" fill="currentColor" aria-hidden="true"><g transform="translate(-0.935 -6.545) translate(32.935 38.545) scale(1.3) translate(-32.935 -38.545)"><path fill-rule="evenodd" d="M13.00 28.00 H18.00 A2.00 2.00 0 0 1 20.00 30.00 V52.00 A2.00 2.00 0 0 1 18.00 54.00 H13.00 A2.00 2.00 0 0 1 11.00 52.00 V30.00 A2.00 2.00 0 0 1 13.00 28.00 Z M27.00 22.00 H32.00 A2.00 2.00 0 0 1 34.00 24.00 V52.00 A2.00 2.00 0 0 1 32.00 54.00 H27.00 A2.00 2.00 0 0 1 25.00 52.00 V24.00 A2.00 2.00 0 0 1 27.00 22.00 Z"/><g transform="translate(0 -1.09) rotate(-14 50.5 54)"><path d="M48.00 24.00 H53.00 A2.00 2.00 0 0 1 55.00 26.00 V52.00 A2.00 2.00 0 0 1 53.00 54.00 H48.00 A2.00 2.00 0 0 1 46.00 52.00 V26.00 A2.00 2.00 0 0 1 48.00 24.00 Z"/></g></g></svg></div><span class="szlab mono">32</span></div><div class="sz"><div class="szbox" style="--n:24px"><svg class="mk" viewBox="0 0 64 64" fill="currentColor" aria-hidden="true"><g transform="translate(-0.935 -6.545) translate(32.935 38.545) scale(1.3) translate(-32.935 -38.545)"><path fill-rule="evenodd" d="M13.00 28.00 H18.00 A2.00 2.00 0 0 1 20.00 30.00 V52.00 A2.00 2.00 0 0 1 18.00 54.00 H13.00 A2.00 2.00 0 0 1 11.00 52.00 V30.00 A2.00 2.00 0 0 1 13.00 28.00 Z M27.00 22.00 H32.00 A2.00 2.00 0 0 1 34.00 24.00 V52.00 A2.00 2.00 0 0 1 32.00 54.00 H27.00 A2.00 2.00 0 0 1 25.00 52.00 V24.00 A2.00 2.00 0 0 1 27.00 22.00 Z"/><g transform="translate(0 -1.09) rotate(-14 50.5 54)"><path d="M48.00 24.00 H53.00 A2.00 2.00 0 0 1 55.00 26.00 V52.00 A2.00 2.00 0 0 1 53.00 54.00 H48.00 A2.00 2.00 0 0 1 46.00 52.00 V26.00 A2.00 2.00 0 0 1 48.00 24.00 Z"/></g></g></svg></div><span class="szlab mono">24</span></div><div class="sz"><div class="szbox" style="--n:16px"><svg class="mk" viewBox="0 0 64 64" fill="currentColor" aria-hidden="true"><g transform="translate(-0.935 -6.545) translate(32.935 38.545) scale(1.3) translate(-32.935 -38.545)"><path fill-rule="evenodd" d="M13.00 28.00 H18.00 A2.00 2.00 0 0 1 20.00 30.00 V52.00 A2.00 2.00 0 0 1 18.00 54.00 H13.00 A2.00 2.00 0 0 1 11.00 52.00 V30.00 A2.00 2.00 0 0 1 13.00 28.00 Z M27.00 22.00 H32.00 A2.00 2.00 0 0 1 34.00 24.00 V52.00 A2.00 2.00 0 0 1 32.00 54.00 H27.00 A2.00 2.00 0 0 1 25.00 52.00 V24.00 A2.00 2.00 0 0 1 27.00 22.00 Z"/><g transform="translate(0 -1.09) rotate(-14 50.5 54)"><path d="M48.00 24.00 H53.00 A2.00 2.00 0 0 1 55.00 26.00 V52.00 A2.00 2.00 0 0 1 53.00 54.00 H48.00 A2.00 2.00 0 0 1 46.00 52.00 V26.00 A2.00 2.00 0 0 1 48.00 24.00 Z"/></g></g></svg></div><span class="szlab mono">16</span></div></div>
+        <div class="clearnote">去掉星芒、整组放大 <b>1.3×</b>，
+        书缝从 1.25px 拉到 1.6px，16px 下三本书才分得开。</div>
+      </div>
+      <div class="panel">
+        <div class="cap mono">组合锁定 · 中文主 + 英文小字 / 600</div>
+        <div class="lockrow"><div class="lock" style="--m:48px;--cn:30px;--en:14px;--gap:16px"><span class="lock-mark"><svg class="mk" viewBox="0 0 64 64" fill="currentColor" aria-hidden="true"><g transform="translate(-0.94 1.25)"><path fill-rule="evenodd" d="M13.00 28.00 H18.00 A2.00 2.00 0 0 1 20.00 30.00 V52.00 A2.00 2.00 0 0 1 18.00 54.00 H13.00 A2.00 2.00 0 0 1 11.00 52.00 V30.00 A2.00 2.00 0 0 1 13.00 28.00 Z M27.00 22.00 H32.00 A2.00 2.00 0 0 1 34.00 24.00 V52.00 A2.00 2.00 0 0 1 32.00 54.00 H27.00 A2.00 2.00 0 0 1 25.00 52.00 V24.00 A2.00 2.00 0 0 1 27.00 22.00 Z"/><g transform="translate(0 -1.09) rotate(-14 50.5 54)"><path d="M48.00 24.00 H53.00 A2.00 2.00 0 0 1 55.00 26.00 V52.00 A2.00 2.00 0 0 1 53.00 54.00 H48.00 A2.00 2.00 0 0 1 46.00 52.00 V26.00 A2.00 2.00 0 0 1 48.00 24.00 Z"/></g><path d="M48.00 7.50 C48.27 10.25 49.10 11.62 53.50 13.00 C49.10 14.38 48.27 15.75 48.00 18.50 C47.73 15.75 46.90 14.38 42.50 13.00 C46.90 11.62 47.73 10.25 48.00 7.50 Z"/></g></svg></span><span class="lock-words"><span class="lock-cn">星河图书</span><span class="lock-en">GALAXY LIBRARY</span></span></div><div class="lock" style="--m:34px;--cn:21px;--en:10px;--gap:12px"><span class="lock-mark"><svg class="mk" viewBox="0 0 64 64" fill="currentColor" aria-hidden="true"><g transform="translate(-0.94 1.25)"><path fill-rule="evenodd" d="M13.00 28.00 H18.00 A2.00 2.00 0 0 1 20.00 30.00 V52.00 A2.00 2.00 0 0 1 18.00 54.00 H13.00 A2.00 2.00 0 0 1 11.00 52.00 V30.00 A2.00 2.00 0 0 1 13.00 28.00 Z M27.00 22.00 H32.00 A2.00 2.00 0 0 1 34.00 24.00 V52.00 A2.00 2.00 0 0 1 32.00 54.00 H27.00 A2.00 2.00 0 0 1 25.00 52.00 V24.00 A2.00 2.00 0 0 1 27.00 22.00 Z"/><g transform="translate(0 -1.09) rotate(-14 50.5 54)"><path d="M48.00 24.00 H53.00 A2.00 2.00 0 0 1 55.00 26.00 V52.00 A2.00 2.00 0 0 1 53.00 54.00 H48.00 A2.00 2.00 0 0 1 46.00 52.00 V26.00 A2.00 2.00 0 0 1 48.00 24.00 Z"/></g><path d="M48.00 7.50 C48.27 10.25 49.10 11.62 53.50 13.00 C49.10 14.38 48.27 15.75 48.00 18.50 C47.73 15.75 46.90 14.38 42.50 13.00 C46.90 11.62 47.73 10.25 48.00 7.50 Z"/></g></svg></span><span class="lock-words"><span class="lock-cn">星河图书</span><span class="lock-en">GALAXY LIBRARY</span></span></div><div class="lock" style="--m:28px;--cn:17px;--en:8.5px;--gap:10px"><span class="lock-mark"><svg class="mk" viewBox="0 0 64 64" fill="currentColor" aria-hidden="true"><g transform="translate(-0.94 1.25)"><path fill-rule="evenodd" d="M13.00 28.00 H18.00 A2.00 2.00 0 0 1 20.00 30.00 V52.00 A2.00 2.00 0 0 1 18.00 54.00 H13.00 A2.00 2.00 0 0 1 11.00 52.00 V30.00 A2.00 2.00 0 0 1 13.00 28.00 Z M27.00 22.00 H32.00 A2.00 2.00 0 0 1 34.00 24.00 V52.00 A2.00 2.00 0 0 1 32.00 54.00 H27.00 A2.00 2.00 0 0 1 25.00 52.00 V24.00 A2.00 2.00 0 0 1 27.00 22.00 Z"/><g transform="translate(0 -1.09) rotate(-14 50.5 54)"><path d="M48.00 24.00 H53.00 A2.00 2.00 0 0 1 55.00 26.00 V52.00 A2.00 2.00 0 0 1 53.00 54.00 H48.00 A2.00 2.00 0 0 1 46.00 52.00 V26.00 A2.00 2.00 0 0 1 48.00 24.00 Z"/></g><path d="M48.00 7.50 C48.27 10.25 49.10 11.62 53.50 13.00 C49.10 14.38 48.27 15.75 48.00 18.50 C47.73 15.75 46.90 14.38 42.50 13.00 C46.90 11.62 47.73 10.25 48.00 7.50 Z"/></g></svg></span><span class="lock-words"><span class="lock-cn">星河图书</span><span class="lock-en">GALAXY LIBRARY</span></span></div></div>
+        <div class="clearnote">中文 600 字重、字距 -.02em；英文用等宽体、字距 .15em，
+        与现有侧栏 <code>LIBRARY · v1.0</code> 的排版语言一致。</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="apps">
+    <div class="panel">
+      <div class="cap mono">应用 · 侧栏 BRAND（28px）</div>
+        <div class="side"><div class="side-inner">
+          <div class="brand">
+            <span class="brand-mark"><svg class="mk" viewBox="0 0 64 64" fill="currentColor" aria-hidden="true"><g transform="translate(-0.94 1.25)"><path fill-rule="evenodd" d="M13.00 28.00 H18.00 A2.00 2.00 0 0 1 20.00 30.00 V52.00 A2.00 2.00 0 0 1 18.00 54.00 H13.00 A2.00 2.00 0 0 1 11.00 52.00 V30.00 A2.00 2.00 0 0 1 13.00 28.00 Z M27.00 22.00 H32.00 A2.00 2.00 0 0 1 34.00 24.00 V52.00 A2.00 2.00 0 0 1 32.00 54.00 H27.00 A2.00 2.00 0 0 1 25.00 52.00 V24.00 A2.00 2.00 0 0 1 27.00 22.00 Z"/><g transform="translate(0 -1.09) rotate(-14 50.5 54)"><path d="M48.00 24.00 H53.00 A2.00 2.00 0 0 1 55.00 26.00 V52.00 A2.00 2.00 0 0 1 53.00 54.00 H48.00 A2.00 2.00 0 0 1 46.00 52.00 V26.00 A2.00 2.00 0 0 1 48.00 24.00 Z"/></g><path d="M48.00 7.50 C48.27 10.25 49.10 11.62 53.50 13.00 C49.10 14.38 48.27 15.75 48.00 18.50 C47.73 15.75 46.90 14.38 42.50 13.00 C46.90 11.62 47.73 10.25 48.00 7.50 Z"/></g></svg></span>
+            <span class="brand-text">
+              <span class="brand-name">星河图书</span>
+              <span class="brand-sub">GALAXY · v1.0</span>
+            </span>
+          </div>
+          <div class="navs">
+            <div class="nav-label">管理</div>
+            <div class="nav-item is-active">图书管理</div>
+            <div class="nav-item">借阅记录<span class="soon">2.0</span></div>
+            <div class="nav-item">用户管理<span class="soon">2.0</span></div>
+          </div>
+        </div></div>
+      <div class="cap mono" style="margin-top:-2px">把现有 .brand-mark 的黑方块换成这个标，
+      文字改「星河图书」即可，结构不动</div>
+    </div>
+    <div class="panel">
+      <div class="cap mono">应用 · 浏览器标签 / FAVICON（16px）</div>
+        <div class="tabbar">
+          <div class="tab">
+            <span class="tab-fav"><svg class="mk" viewBox="0 0 64 64" fill="currentColor" aria-hidden="true"><g transform="translate(-0.935 -6.545) translate(32.935 38.545) scale(1.3) translate(-32.935 -38.545)"><path fill-rule="evenodd" d="M13.00 28.00 H18.00 A2.00 2.00 0 0 1 20.00 30.00 V52.00 A2.00 2.00 0 0 1 18.00 54.00 H13.00 A2.00 2.00 0 0 1 11.00 52.00 V30.00 A2.00 2.00 0 0 1 13.00 28.00 Z M27.00 22.00 H32.00 A2.00 2.00 0 0 1 34.00 24.00 V52.00 A2.00 2.00 0 0 1 32.00 54.00 H27.00 A2.00 2.00 0 0 1 25.00 52.00 V24.00 A2.00 2.00 0 0 1 27.00 22.00 Z"/><g transform="translate(0 -1.09) rotate(-14 50.5 54)"><path d="M48.00 24.00 H53.00 A2.00 2.00 0 0 1 55.00 26.00 V52.00 A2.00 2.00 0 0 1 53.00 54.00 H48.00 A2.00 2.00 0 0 1 46.00 52.00 V26.00 A2.00 2.00 0 0 1 48.00 24.00 Z"/></g></g></svg></span>
+            <span>星河图书 · 图书管理系统</span>
+            <span class="tab-x">×</span>
+          </div>
+          <div class="tab-plus">+</div>
+        </div>
+        <div class="tabpage"></div>
+        <div class="cap mono" style="margin-top:2px">标签页用的是简版（16px 下星芒会糊成一个点）</div>
+    </div>
+    <div class="panel">
+      <div class="cap mono">应用 · 深色底反白</div>
+      <div class="strip"><div class="item"><span class="mk"><svg class="mk" viewBox="0 0 64 64" fill="currentColor" aria-hidden="true"><g transform="translate(-0.94 1.25)"><path fill-rule="evenodd" d="M13.00 28.00 H18.00 A2.00 2.00 0 0 1 20.00 30.00 V52.00 A2.00 2.00 0 0 1 18.00 54.00 H13.00 A2.00 2.00 0 0 1 11.00 52.00 V30.00 A2.00 2.00 0 0 1 13.00 28.00 Z M27.00 22.00 H32.00 A2.00 2.00 0 0 1 34.00 24.00 V52.00 A2.00 2.00 0 0 1 32.00 54.00 H27.00 A2.00 2.00 0 0 1 25.00 52.00 V24.00 A2.00 2.00 0 0 1 27.00 22.00 Z"/><g transform="translate(0 -1.09) rotate(-14 50.5 54)"><path d="M48.00 24.00 H53.00 A2.00 2.00 0 0 1 55.00 26.00 V52.00 A2.00 2.00 0 0 1 53.00 54.00 H48.00 A2.00 2.00 0 0 1 46.00 52.00 V26.00 A2.00 2.00 0 0 1 48.00 24.00 Z"/></g><path d="M48.00 7.50 C48.27 10.25 49.10 11.62 53.50 13.00 C49.10 14.38 48.27 15.75 48.00 18.50 C47.73 15.75 46.90 14.38 42.50 13.00 C46.90 11.62 47.73 10.25 48.00 7.50 Z"/></g></svg></span><span class="lbl">主标 40</span></div><div class="item"><span class="mk"><svg class="mk" viewBox="0 0 64 64" fill="currentColor" aria-hidden="true"><g transform="translate(-0.94 1.25)"><path fill-rule="evenodd" d="M13.00 28.00 H18.00 A2.00 2.00 0 0 1 20.00 30.00 V52.00 A2.00 2.00 0 0 1 18.00 54.00 H13.00 A2.00 2.00 0 0 1 11.00 52.00 V30.00 A2.00 2.00 0 0 1 13.00 28.00 Z M27.00 22.00 H32.00 A2.00 2.00 0 0 1 34.00 24.00 V52.00 A2.00 2.00 0 0 1 32.00 54.00 H27.00 A2.00 2.00 0 0 1 25.00 52.00 V24.00 A2.00 2.00 0 0 1 27.00 22.00 Z"/><g transform="translate(0 -1.09) rotate(-14 50.5 54)"><path d="M48.00 24.00 H53.00 A2.00 2.00 0 0 1 55.00 26.00 V52.00 A2.00 2.00 0 0 1 53.00 54.00 H48.00 A2.00 2.00 0 0 1 46.00 52.00 V26.00 A2.00 2.00 0 0 1 48.00 24.00 Z"/></g><path d="M48.00 7.50 C48.27 10.25 49.10 11.62 53.50 13.00 C49.10 14.38 48.27 15.75 48.00 18.50 C47.73 15.75 46.90 14.38 42.50 13.00 C46.90 11.62 47.73 10.25 48.00 7.50 Z"/></g></svg></span><span class="lbl">主标 24</span></div><div class="item"><span class="mk"><svg class="mk" viewBox="0 0 64 64" fill="currentColor" aria-hidden="true"><g transform="translate(-0.935 -6.545) translate(32.935 38.545) scale(1.3) translate(-32.935 -38.545)"><path fill-rule="evenodd" d="M13.00 28.00 H18.00 A2.00 2.00 0 0 1 20.00 30.00 V52.00 A2.00 2.00 0 0 1 18.00 54.00 H13.00 A2.00 2.00 0 0 1 11.00 52.00 V30.00 A2.00 2.00 0 0 1 13.00 28.00 Z M27.00 22.00 H32.00 A2.00 2.00 0 0 1 34.00 24.00 V52.00 A2.00 2.00 0 0 1 32.00 54.00 H27.00 A2.00 2.00 0 0 1 25.00 52.00 V24.00 A2.00 2.00 0 0 1 27.00 22.00 Z"/><g transform="translate(0 -1.09) rotate(-14 50.5 54)"><path d="M48.00 24.00 H53.00 A2.00 2.00 0 0 1 55.00 26.00 V52.00 A2.00 2.00 0 0 1 53.00 54.00 H48.00 A2.00 2.00 0 0 1 46.00 52.00 V26.00 A2.00 2.00 0 0 1 48.00 24.00 Z"/></g></g></svg></span><span class="lbl">简版 16</span></div></div>
+      <div class="cap mono" style="margin-top:-2px">同一份文件换 color 就变白，不需要第二套资源</div>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <div>
+      <h3>文件位置</h3>
+      <p>矢量源文件在 <code>docs/brand/svg/</code>，坐标写在
+      <code>tools/gen_logo.py</code> 里，改完重跑脚本，不要手改 SVG——
+      星芒控制点与居中补偿都是算出来的。</p>
+    </div>
+    <div>
+      <h3>落地方式</h3>
+      <p>把 <code>mark-d-shelf-books.svg</code> 与 <code>mark-d-shelf-books-compact.svg</code>
+      复制到 <code>library-web/public/brand/</code>；<code>index.html</code> 加
+      <code>&lt;link rel="icon" href="/brand/favicon.svg"&gt;</code>；
+      侧栏 <code>MainLayout.vue</code> 的 <code>.brand-mark</code> 换成该 SVG。</p>
+    </div>
+    <div>
+      <h3>还差一步</h3>
+      <p>网页里的字标用真实 HTML 文字渲染（更清晰、可被搜索），所以不需要转曲；
+      但若要做印刷 / 对外物料，需要按最终字体把「星河图书」描边转曲，
+      再产出一份独立的 lockup SVG。</p>
+    </div>
+  </footer>
+
+</div>
+<script>
+const KEY = 'xinghe-logo-prefs';
+let prefs = Object.assign({theme:'light', word:'both', grid:'off'},
+                          JSON.parse(localStorage.getItem(KEY) || '{}'));
+
+function apply() {
+  document.body.classList.toggle('theme-dark', prefs.theme === 'dark');
+  document.body.classList.toggle('word-cn',    prefs.word === 'cn');
+  document.body.classList.toggle('word-en',    prefs.word === 'en');
+  document.body.classList.toggle('gridon',     prefs.grid === 'on');
+  document.querySelectorAll('.seg').forEach(seg => {
+    const g = seg.dataset.group;
+    seg.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.v === prefs[g]));
+  });
+  localStorage.setItem(KEY, JSON.stringify(prefs));
+}
+
+document.querySelectorAll('.seg button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    prefs[btn.parentElement.dataset.group] = btn.dataset.v;
+    apply();
+  });
+});
+apply();
+</script>
+</body>
+</html>

@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.libaray_manager_system.mapper.NoticeMapper">
+
+    <!-- 列表与总数共用的筛选条件，两边必须一致 -->
+    <sql id="noticeWhere">
+        <where>
+            <if test="dto.status != null">
+                AND n.status = #{dto.status}
+            </if>
+            <if test="dto.type != null">
+                AND n.type = #{dto.type}
+            </if>
+            <if test="dto.onlyTop != null and dto.onlyTop == 1">
+                AND n.is_top = 1
+            </if>
+            <if test="dto.keyword != null and dto.keyword != ''">
+                AND (n.title LIKE CONCAT('%', #{dto.keyword}, '%')
+                OR n.content LIKE CONCAT('%', #{dto.keyword}, '%'))
+            </if>
+        </where>
+    </sql>
+
+    <select id="GetNotices" resultType="org.libaray_manager_system.pojo.vo.NoticeVo">
+        SELECT n.id,
+               n.title,
+               LEFT(n.content, 60)                      AS summary,
+               n.type,
+               n.is_top,
+               n.status,
+               COALESCE(u.real_name, u.username)        AS publisher_name,
+               n.publish_time,
+               CASE WHEN r.id IS NULL THEN 0 ELSE 1 END AS is_read
+        FROM notice n
+                 LEFT JOIN sys_user u ON u.id = n.publisher_id
+                 <!-- r.user_id 只能写在 ON 后面，挪到 WHERE 会让 LEFT JOIN 退化成 INNER JOIN -->
+                 LEFT JOIN notice_read r ON r.notice_id = n.id AND r.user_id = #{userId}
+        <include refid="noticeWhere"/>
+        ORDER BY n.is_top DESC, n.publish_time DESC
+        LIMIT #{startIndex}, #{dto.pageSize}
+    </select>
+
+    <select id="GetNoticeCount" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM notice n
+        <include refid="noticeWhere"/>
+    </select>
+
+    <select id="GetNoticeEntityById" resultType="org.libaray_manager_system.pojo.entity.Notice">
+        SELECT *
+        FROM notice
+        WHERE id = #{id}
+    </select>
+
+    <select id="GetNoticeById" resultType="org.libaray_manager_system.pojo.vo.NoticeDetailVo">
+        SELECT n.id,
+               n.title,
+               n.content,
+               n.type,
+               n.is_top,
+               n.status,
+               COALESCE(u.real_name, u.username)        AS publisher_name,
+               n.publish_time,
+               n.update_time,
+               CASE WHEN r.id IS NULL THEN 0 ELSE 1 END AS is_read
+        FROM notice n
+                 LEFT JOIN sys_user u ON u.id = n.publisher_id
+                 LEFT JOIN notice_read r ON r.notice_id = n.id AND r.user_id = #{userId}
+        WHERE n.id = #{id}
+    </select>
+
+    <!-- 靠 uk_notice_user 唯一索引做幂等：重复打开同一篇只会有一行 -->
+    <insert id="InsertRead">
+        INSERT IGNORE INTO notice_read (notice_id, user_id)
+        VALUES (#{noticeId}, #{userId})
+    </insert>
+
+    <select id="GetUnreadCount" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM notice n
+        WHERE n.status = 1
+          AND NOT EXISTS (SELECT 1
+                          FROM notice_read r
+                          WHERE r.notice_id = n.id
+                            AND r.user_id = #{userId})
+    </select>
+
+    <insert id="Insert" parameterType="org.libaray_manager_system.pojo.entity.Notice"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO notice (title, content, type, is_top, status, publisher_id, publish_time)
+        VALUES (#{title}, #{content}, #{type}, #{isTop}, #{status}, #{publisherId}, #{publishTime})
+    </insert>
+
+    <!-- 故意不更新 publisher_id / publish_time：发布人和首次发布时间不因编辑而改变 -->
+    <update id="UpdateById">
+        UPDATE notice
+        SET title   = #{title},
+            content = #{content},
+            type    = #{type},
+            is_top  = #{isTop},
+            status  = #{status}
+        WHERE id = #{id}
+    </update>
+
+    <update id="UpdateTop">
+        UPDATE notice
+        SET is_top = #{isTop}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="DeleteById">
+        DELETE FROM notice
+        WHERE id = #{id}
+    </delete>
+
+    <delete id="DeleteReadByNoticeId">
+        DELETE FROM notice_read
+        WHERE notice_id = #{noticeId}
+    </delete>
+
+</mapper>

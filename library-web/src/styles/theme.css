@@ -1,0 +1,386 @@
+/* ============================================================================
+   图书管理系统 · 设计系统
+   风格：B「黑白强对比」（锚点 Vercel / Geist）
+   ============================================================================
+
+   系统说明（改样式前先读这里，避免各页面各写一套）
+
+   色彩   纯黑白灰阶。强调色为零 —— 主按钮就是纯黑，没有品牌色。
+          唯一例外是 --alert（克制的红），只用于「删除」和「已借完」这类
+          必须被一眼看到的地方。想要彻底单色，把 --alert 改成 #000 即可。
+   字     中文 HarmonyOS Sans SC → MiSans → 思源黑体 → 苹方 → 微软雅黑
+          数字一律 tabular-nums（金额、册数上下要对齐）
+   尺度   规范级：正文 13.5px、表格 13.5px、页标题 20px、控件高 32px
+   形状   圆角 4 / 5 / 8 三档；除弹窗外一律无阴影，层级靠 1px 发丝线
+   动效   只做 120ms 的颜色/边框过渡，不做位移与缩放
+   密度   表格行高 48px，表头 12px 大写字距 .02em
+   ========================================================================== */
+
+:root {
+  /* ---------- 字体 ---------- */
+  /* MiSans VF 是可变字体（字重轴 150~700），本设计用到的 400/450/500/600 全覆盖，
+     所以一个文件就能顶替原来那串静态字重。
+     ⚠️ 家族名必须写 "MiSans VF"，写 "MiSans" 是不生效的（内部名称就叫这个）。
+     没装的话会自动往后回退到系统中文字体，不会白屏。 */
+  --font-sans: "MiSans VF", "HarmonyOS Sans SC", "MiSans", "Source Han Sans SC",
+               "Noto Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  /* 等宽：ISBN、数字、版本号标签用；JetBrains Mono 没装时回退 Consolas */
+  --font-mono: "JetBrains Mono", "SF Mono", "Cascadia Mono", Consolas, monospace;
+
+  /* ---------- 灰阶 ---------- */
+  --ink-1: #000000;   /* 主文字 / 主按钮底 */
+  --ink-2: #3d3d3d;   /* 次要文字 */
+  --ink-3: #7a7a7a;   /* 辅助文字 */
+  --ink-4: #9a9a9a;   /* 占位 / 表头 */
+  --ink-5: #c4c4c4;   /* 禁用 */
+
+  --surface: #ffffff;
+  --canvas: #f7f7f7;  /* 页面底色（顶栏/侧栏之外的空隙） */
+
+  --line: #ededed;          /* 发丝线 */
+  --line-strong: #e2e2e2;   /* 控件描边 */
+  --line-hover: #c9c9c9;
+  --row-line: #f0f0f0;      /* 表格行线（比发丝线更浅） */
+
+  --hover: #fafafa;         /* 行/项 hover */
+  --selected: #f5f5f5;      /* 选中态（浅灰底，不用彩色块） */
+  --subtle: #fafafa;        /* 次级填充 */
+
+  /* ---------- 语义色（克制到只有一处） ---------- */
+  --alert: #c8362c;
+  --alert-soft: #fdf3f2;
+
+  /* ---------- 形状与动效 ---------- */
+  --r-sm: 4px;
+  --r-md: 5px;
+  --r-lg: 8px;
+  --ease: 120ms cubic-bezier(.4, 0, .2, 1);
+
+  /* ==========================================================================
+     Element Plus 变量覆盖
+     放在这个文件里、且在 main.js 中于 element-plus 样式之后引入，才能生效
+     ======================================================================== */
+  --el-color-primary: #000000;
+  --el-color-primary-light-3: #2b2b2b;
+  --el-color-primary-light-5: #555555;
+  --el-color-primary-light-7: #8f8f8f;
+  --el-color-primary-light-8: #b5b5b5;
+  --el-color-primary-light-9: #f4f4f4;
+  --el-color-primary-dark-2: #000000;
+
+  --el-color-danger: #c8362c;
+  --el-color-danger-light-9: #fdf3f2;
+  --el-color-success: #000000;
+  --el-color-warning: #000000;
+  --el-color-info: #7a7a7a;
+
+  --el-text-color-primary: #000000;
+  --el-text-color-regular: #3d3d3d;
+  --el-text-color-secondary: #7a7a7a;
+  --el-text-color-placeholder: #9a9a9a;
+  --el-text-color-disabled: #c4c4c4;
+
+  --el-border-color: #e2e2e2;
+  --el-border-color-light: #ededed;
+  --el-border-color-lighter: #f0f0f0;
+  --el-border-color-extra-light: #f5f5f5;
+  --el-border-color-hover: #c9c9c9;
+
+  --el-fill-color: #f5f5f5;
+  --el-fill-color-light: #fafafa;
+  --el-fill-color-lighter: #fcfcfc;
+  --el-fill-color-blank: #ffffff;
+  --el-bg-color: #ffffff;
+  --el-bg-color-page: #f7f7f7;
+  --el-bg-color-overlay: #ffffff;
+
+  --el-border-radius-base: 5px;
+  --el-border-radius-small: 4px;
+  --el-border-radius-round: 999px;
+
+  --el-font-family: var(--font-sans);
+  --el-font-size-base: 13.5px;
+  --el-font-size-small: 12.5px;
+
+  --el-component-size: 32px;
+  --el-component-size-small: 28px;
+  --el-component-size-large: 38px;
+
+  /* 除弹窗外不给阴影，层级交给发丝线 */
+  --el-box-shadow: 0 16px 48px rgba(0, 0, 0, .12);
+  --el-box-shadow-light: 0 0 0 1px rgba(0, 0, 0, .04);
+  --el-box-shadow-lighter: 0 0 0 1px rgba(0, 0, 0, .03);
+
+  --el-transition-duration: .12s;
+}
+
+/* ============================ 基础 ============================ */
+html, body, #app { height: 100%; }
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--ink-1);
+  background: var(--canvas);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* { box-sizing: border-box; }
+
+/* 数字对齐：金额、册数、ISBN 一律等宽 */
+.tnum,
+.el-table td .tnum,
+.el-pagination,
+.el-input__inner { font-variant-numeric: tabular-nums; }
+
+.mono { font-family: var(--font-mono); letter-spacing: -.02em; }
+
+/* ============================ 按钮 ============================ */
+.el-button {
+  border-radius: var(--r-md);
+  font-weight: 450;
+  transition: background var(--ease), border-color var(--ease), color var(--ease);
+}
+
+/* 主按钮 = 纯黑（B 版的核心特征：没有品牌色） */
+.el-button--primary {
+  --el-button-bg-color: #000;
+  --el-button-border-color: #000;
+  --el-button-hover-bg-color: #262626;
+  --el-button-hover-border-color: #262626;
+  --el-button-active-bg-color: #000;
+  --el-button-active-border-color: #000;
+  --el-button-disabled-bg-color: #c4c4c4;
+  --el-button-disabled-border-color: #c4c4c4;
+}
+
+/* 默认按钮：白底细描边，hover 只加深边框 */
+.el-button--default {
+  --el-button-bg-color: #fff;
+  --el-button-border-color: var(--line-strong);
+  --el-button-text-color: var(--ink-2);
+  --el-button-hover-bg-color: #fff;
+  --el-button-hover-border-color: var(--line-hover);
+  --el-button-hover-text-color: var(--ink-1);
+  --el-button-active-bg-color: var(--hover);
+}
+
+.el-button.is-link {
+  font-weight: 450;
+  height: auto;
+  padding: 0 2px;
+}
+
+/* 危险操作才允许出现颜色 */
+.el-button--danger,
+.el-button--danger.is-link {
+  --el-button-text-color: var(--alert);
+  --el-button-hover-text-color: var(--alert);
+}
+
+/* ============================ 输入 / 选择 ============================ */
+.el-input__wrapper,
+.el-textarea__inner,
+.el-select__wrapper {
+  border-radius: var(--r-md);
+  box-shadow: 0 0 0 1px var(--line-strong) inset;
+  transition: box-shadow var(--ease);
+}
+
+.el-input__wrapper:hover,
+.el-textarea__inner:hover,
+.el-select__wrapper:hover {
+  box-shadow: 0 0 0 1px var(--line-hover) inset;
+}
+
+.el-input__wrapper.is-focus,
+.el-textarea__inner:focus,
+.el-select__wrapper.is-focused {
+  box-shadow: 0 0 0 1px #000 inset !important;
+}
+
+.el-input__inner::placeholder,
+.el-textarea__inner::placeholder { color: var(--ink-4); }
+
+/* ============================ 表格 ============================ */
+.el-table {
+  --el-table-border-color: var(--line);
+  --el-table-header-bg-color: #fff;
+  --el-table-header-text-color: var(--ink-4);
+  --el-table-text-color: var(--ink-1);
+  --el-table-row-hover-bg-color: var(--hover);
+  --el-table-current-row-bg-color: var(--selected);
+  font-size: 13.5px;
+}
+
+/* B 版特征：表头用一条较重的上、下黑线，像一份年报里的表格 */
+.el-table th.el-table__cell,
+.el-table--default th.el-table__cell,
+.el-table--large th.el-table__cell {
+  background: #fff;
+  border-top: 1px solid #000;
+  border-bottom: 1px solid #000;
+  padding: 9px 0;
+}
+
+.el-table th.el-table__cell > .cell {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: .02em;
+  color: var(--ink-4);
+}
+
+.el-table td.el-table__cell {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--row-line);
+}
+
+/* 去掉 Element 自带的那条底部多余的线 */
+.el-table::before,
+.el-table__inner-wrapper::before { display: none; }
+
+.el-table--border::after { display: none; }
+
+/* 首次加载的骨架屏：和表格的左右留白对齐，别让内容贴边 */
+.table-skeleton {
+  padding: 18px 0;
+}
+
+/* ============================ 分页 ============================ */
+.el-pagination {
+  --el-pagination-bg-color: transparent;
+  --el-pagination-button-bg-color: transparent;
+  --el-pagination-hover-color: #000;
+  font-weight: 450;
+}
+
+.el-pagination .el-pager li {
+  border-radius: var(--r-sm);
+  font-weight: 450;
+  transition: background var(--ease), color var(--ease);
+}
+
+/* 当前页 = 黑底白字方块 */
+.el-pagination .el-pager li.is-active {
+  background: #000;
+  color: #fff;
+}
+
+.el-pagination .el-pager li:not(.is-active):hover { background: var(--hover); }
+
+.el-pagination button:hover:not(:disabled) { background: var(--hover); }
+
+/* ============================ 弹窗 / 确认框 ============================ */
+.el-dialog {
+  --el-dialog-padding-primary: 0;
+  border-radius: var(--r-lg);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, .14);
+  overflow: hidden;
+}
+
+.el-dialog__header {
+  margin: 0;
+  padding: 17px 24px;
+  border-bottom: 1px solid var(--line);
+}
+
+.el-dialog__title {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -.01em;
+  color: var(--ink-1);
+}
+
+.el-dialog__headerbtn { top: 14px; right: 16px; }
+
+.el-dialog__body { padding: 22px 24px; }
+
+.el-dialog__footer {
+  padding: 14px 24px;
+  border-top: 1px solid var(--line);
+}
+
+.el-message-box {
+  border-radius: var(--r-lg);
+  border: 1px solid var(--line);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, .14);
+  padding: 22px 24px;
+}
+
+.el-message-box__title { font-size: 15px; font-weight: 600; }
+
+.el-message-box__header { padding: 0 0 10px; }
+
+.el-message-box__content { padding: 0; color: var(--ink-2); }
+
+.el-message-box__btns { padding: 18px 0 0; }
+
+/* ============================ 抽屉（图书详情） ============================ */
+.el-drawer {
+  --el-drawer-padding-primary: 0;
+}
+
+.el-drawer__header {
+  margin: 0;
+  padding: 17px 24px;
+  border-bottom: 1px solid var(--line);
+  color: var(--ink-1);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -.01em;
+}
+
+.el-drawer__body { padding: 22px 24px; }
+
+.el-drawer__footer {
+  padding: 14px 24px;
+  border-top: 1px solid var(--line);
+}
+
+/* ============================ 表单 ============================ */
+.el-form-item__label {
+  font-size: 13px;
+  color: var(--ink-2);
+  font-weight: 450;
+}
+
+.el-form-item.is-error .el-input__wrapper,
+.el-form-item.is-error .el-select__wrapper {
+  box-shadow: 0 0 0 1px var(--alert) inset !important;
+}
+
+.el-form-item__error { font-size: 12px; color: var(--alert); }
+
+/* ============================ 单选 / 开关 ============================ */
+.el-radio__input.is-checked .el-radio__inner {
+  background: #000;
+  border-color: #000;
+}
+
+.el-radio__input.is-checked + .el-radio__label { color: var(--ink-1); }
+
+.el-switch.is-checked .el-switch__core {
+  background-color: #000;
+  border-color: #000;
+}
+
+/* ============================ 空状态 ============================ */
+/* 不用 Element 默认那幅插画，改成一行的极简提示 */
+.el-empty { padding: 40px 0; }
+.el-empty__image { display: none; }
+.el-empty__description { margin-top: 0; }
+.el-empty__description p { color: var(--ink-4); font-size: 13px; }
+
+/* ============================ 全局提示 ============================ */
+.el-message {
+  border-radius: var(--r-md);
+  border-color: var(--line);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .08);
+  min-width: 260px;
+}
+
+.el-message--error { --el-message-text-color: var(--alert); }
+.el-message--success { --el-message-text-color: var(--ink-1); }

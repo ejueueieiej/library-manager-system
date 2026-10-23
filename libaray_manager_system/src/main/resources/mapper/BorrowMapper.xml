@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.libaray_manager_system.mapper.BorrowMapper">
+
+    <select id="CountBorrowingByUserAndBook" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM borrow_record
+        WHERE user_id = #{userId}
+          AND book_id = #{bookId}
+          AND status = 1
+    </select>
+
+    <select id="CountBorrowingByUser" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM borrow_record
+        WHERE user_id = #{userId}
+          AND status = 1
+    </select>
+
+    <!-- 判断和扣减压在同一条 SQL 里，靠受影响行数知道抢没抢到：0 行 = 没库存或已下架 -->
+    <update id="DecreaseAvailable">
+        UPDATE book
+        SET available_num = available_num - 1
+        WHERE id = #{bookId}
+          AND status = 1
+          AND available_num > 0
+    </update>
+
+    <insert id="InsertBorrow">
+        INSERT INTO borrow_record (user_id, book_id, borrow_time, due_time, status)
+        VALUES (#{userId}, #{bookId}, #{borrowTime}, #{dueTime}, 1)
+    </insert>
+
+    <!-- 我的借阅：列表与总数共用同一套条件 -->
+    <sql id="myBorrowWhere">
+        <where>
+            AND r.user_id = #{userId}
+            <if test="dto.status != null">
+                AND r.status = #{dto.status}
+            </if>
+            <if test="dto.overdue != null and dto.overdue == 1">
+                AND r.status = 1
+                AND r.due_time &lt; NOW()
+            </if>
+        </where>
+    </sql>
+
+    <!-- 借出中排前面，其中逾期的再排前面，同组按借出时间倒序 -->
+    <sql id="borrowOrder">
+        ORDER BY (r.status = 1) DESC,
+                 (r.status = 1 AND r.due_time &lt; NOW()) DESC,
+                 r.borrow_time DESC
+    </sql>
+
+    <select id="GetMyBorrows" resultType="org.libaray_manager_system.pojo.vo.BorrowVo">
+        SELECT r.id,
+               r.user_id,
+               u.username,
+               COALESCE(u.real_name, u.username) AS user_name,
+               r.book_id,
+               b.name                            AS book_name,
+               b.isbn                            AS book_isbn,
+               b.cover_url                       AS book_cover_url,
+               r.borrow_time,
+               r.due_time,
+               r.return_time,
+               r.status,
+               r.renew_count
+        FROM borrow_record r
+                 LEFT JOIN book b ON b.id = r.book_id
+                 LEFT JOIN sys_user u ON u.id = r.user_id
+        <include refid="myBorrowWhere"/>
+        <include refid="borrowOrder"/>
+        LIMIT #{startIndex}, #{dto.pageSize}
+    </select>
+
+    <select id="GetMyBorrowCount" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM borrow_record r
+        <include refid="myBorrowWhere"/>
+    </select>
+
+    <!-- overdueDays / canRenew 不是数据库列，由 Service 补 -->
+    <select id="GetMySummary" resultType="org.libaray_manager_system.pojo.vo.BorrowSummaryVo">
+        SELECT COUNT(CASE WHEN status = 1 THEN 1 END)                       AS borrowing_count,
+               COUNT(CASE WHEN status = 1 AND due_time &lt; NOW() THEN 1 END) AS overdue_count,
+               COUNT(CASE WHEN status IN (1, 2) THEN 1 END)                 AS total_count
+        FROM borrow_record
+        WHERE user_id = #{userId}
+    </select>
+
+    <select id="GetById" resultType="org.libaray_manager_system.pojo.entity.BorrowRecord">
+        SELECT *
+        FROM borrow_record
+        WHERE id = #{id}
+    </select>
+
+    <!-- 只有"借出中"才允许被翻转；0 行 = 已经被别的请求改过了 -->
+    <update id="ReturnBook">
+        UPDATE borrow_record
+        SET status = 2,
+            return_time = #{returnTime}
+        WHERE id = #{id}
+          AND status = 1
+    </update>
+
+    <!-- 小于号必须转义；库存满了或书被删了就返回 0 行，不算失败 -->
+    <update id="IncreaseAvailable">
+        UPDATE book
+        SET available_num = available_num + 1
+        WHERE id = #{bookId}
+          AND available_num &lt; total_num
+    </update>
+
+    <!-- 从"原应还时间"往后加，不是从今天加；再带一次续借次数上限，防双击 -->
+    <update id="RenewBook">
+        UPDATE borrow_record
+        SET due_time    = DATE_ADD(due_time, INTERVAL #{renewDays} DAY),
+            renew_count = renew_count + 1
+        WHERE id = #{id}
+          AND status = 1
+          AND renew_count &lt; 1
+    </update>
+
+    <!-- 全部记录（管理员）：条件里引用了 u.username / b.name，
+         所以下面 count 那条也必须带同样的 JOIN，否则会报 Unknown column -->
+    <sql id="allBorrowWhere">
+        <where>
+            <if test="dto.status != null">
+                AND r.status = #{dto.status}
+            </if>
+            <if test="dto.overdue != null and dto.overdue == 1">
+                AND r.status = 1
+                AND r.due_time &lt; NOW()
+            </if>
+            <if test="dto.username != null and dto.username != ''">
+                AND u.username LIKE CONCAT('%', #{dto.username}, '%')
+            </if>
+            <if test="dto.bookName != null and dto.bookName != ''">
+                AND b.name LIKE CONCAT('%', #{dto.bookName}, '%')
+            </if>
+        </where>
+    </sql>
+
+    <select id="GetAllBorrows" resultType="org.libaray_manager_system.pojo.vo.BorrowVo">
+        SELECT r.id,
+               r.user_id,
+               u.username,
+               COALESCE(u.real_name, u.username) AS user_name,
+               r.book_id,
+               b.name                            AS book_name,
+               b.isbn                            AS book_isbn,
+               b.cover_url                       AS book_cover_url,
+               r.borrow_time,
+               r.due_time,
+               r.return_time,
+               r.status,
+               r.renew_count
+        FROM borrow_record r
+                 LEFT JOIN book b ON b.id = r.book_id
+                 LEFT JOIN sys_user u ON u.id = r.user_id
+        <include refid="allBorrowWhere"/>
+        <include refid="borrowOrder"/>
+        LIMIT #{startIndex}, #{dto.pageSize}
+    </select>
+
+    <select id="GetAllBorrowCount" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM borrow_record r
+                 LEFT JOIN book b ON b.id = r.book_id
+                 LEFT JOIN sys_user u ON u.id = r.user_id
+        <include refid="allBorrowWhere"/>
+    </select>
+
+    <!-- 撤销：和归还同一个幂等门（只翻转"借出中"），0 行 = 已经被改过 -->
+    <update id="CancelBorrow">
+        UPDATE borrow_record
+        SET status = 3
+        WHERE id = #{id}
+          AND status = 1
+    </update>
+
+    <!-- 备用通道：只允许删非"借出中"的记录。
+         status != 1 是最后一道闸：万一 Service 被改坏，数据库也不让删 -->
+    <delete id="DeleteById">
+        DELETE FROM borrow_record
+        WHERE id = #{id}
+          AND status != 1
+    </delete>
+
+</mapper>

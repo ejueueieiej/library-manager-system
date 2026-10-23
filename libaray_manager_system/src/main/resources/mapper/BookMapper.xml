@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.libaray_manager_system.mapper.BookMapper">
+    <!-- id 必须和接口方法名一模一样 -->
+    <select id="GetAllCategories" resultType="Category">
+        select * from book_category order by sort
+    </select>
+
+    <!-- 查询总记录数 -->
+    <select id="GetTotal" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM book b
+        LEFT JOIN book_category c ON b.category_id = c.id
+        <where>
+            <if test="isbn != null and isbn != ''">
+                AND b.isbn = #{isbn}
+            </if>
+            <if test="name != null and name != ''">
+                AND b.name LIKE CONCAT('%', #{name}, '%')
+            </if>
+            <if test="author != null and author != ''">
+                AND b.author LIKE CONCAT('%', #{author}, '%')
+            </if>
+            <if test="categoryId != null">
+                AND b.category_id = #{categoryId}
+            </if>
+            <if test="status != null">
+                AND b.status = #{status}
+            </if>
+        </where>
+    </select>
+
+    <!-- 分页查询全部记录 -->
+    <select id="GetAllBooks" resultType="Book">
+        SELECT b.*, c.name AS category_name
+        FROM book b
+        LEFT JOIN book_category c ON b.category_id = c.id
+        <where>
+            <if test="bookQuerySelectDto.isbn != null and bookQuerySelectDto.isbn != ''">
+                AND b.isbn = #{bookQuerySelectDto.isbn}
+            </if>
+            <if test="bookQuerySelectDto.name != null and bookQuerySelectDto.name != ''">
+                AND b.name LIKE CONCAT('%', #{bookQuerySelectDto.name}, '%')
+            </if>
+            <if test="bookQuerySelectDto.author != null and bookQuerySelectDto.author != ''">
+                AND b.author LIKE CONCAT('%', #{bookQuerySelectDto.author}, '%')
+            </if>
+            <if test="bookQuerySelectDto.categoryId != null">
+                AND b.category_id = #{bookQuerySelectDto.categoryId}
+            </if>
+            <if test="bookQuerySelectDto.status != null">
+                AND b.status = #{bookQuerySelectDto.status}
+            </if>
+        </where>
+        ORDER BY b.create_time DESC, b.id DESC
+        LIMIT #{BeginIndex}, #{bookQuerySelectDto.pageSize};
+    </select>
+
+    <!-- 根据id查询记录 -->
+    <select id="GetBookById" resultType="Book">
+        SELECT b.*, c.name AS category_name
+        FROM book b
+        LEFT JOIN book_category c ON b.category_id = c.id
+        WHERE b.id = #{id};
+    </select>
+
+    <!-- ================= 新增图书 ================= -->
+
+    <!-- ISBN 唯一性预查：返回 0 表示没重复。
+         excludeId 是给「修改图书」用的：改自己的资料时不能把自己当成重复。
+         新增时传 null，<if> 不成立，条件里就只有 isbn 一个。 -->
+    <select id="CountByIsbn" resultType="int">
+        SELECT COUNT(*)
+        FROM book
+        <where>
+            isbn = #{isbn}
+            <if test="excludeId != null">
+                AND id != #{excludeId}
+            </if>
+        </where>
+    </select>
+
+    <!-- 分类存在性校验：返回 0 表示这个分类 id 不存在 -->
+    <select id="CountCategoryById" resultType="int">
+        SELECT COUNT(*)
+        FROM book_category
+        WHERE id = #{id}
+    </select>
+
+    <!-- 新增图书
+         ★ available_num 直接写成 #{totalNum}（同一个值用了两次）：
+           这样「可借册数 = 总册数」是在 SQL 层面定死的，
+           前端就算偷偷传了 availableNum 也影响不到它，比在 Java 里赋值更保险。
+         ★ create_time / update_time 不写，交给 MySQL 的 DEFAULT CURRENT_TIMESTAMP。 -->
+    <insert id="InsertBook">
+        INSERT INTO book (isbn, name, author, publisher, publish_date, category_id,
+                          price, total_num, available_num, cover_url, intro, status)
+        VALUES (#{isbn}, #{name}, #{author}, #{publisher}, #{publishDate}, #{categoryId},
+                #{price}, #{totalNum}, #{totalNum}, #{coverUrl}, #{intro}, #{status})
+    </insert>
+
+    <!-- 修改图书
+         ★ available_num 千万不能写成 #{dto.totalNum}！
+           那样等于「总册数改成几，可借数就是几」，会把已经借出去的书凭空变出来。
+           1.0 还没借阅功能时两种写法看不出差别，2.0 加上借阅就是数据事故。
+           正确口径（已借出册数不变）：
+               已借出 = 旧总册数 - 旧可用数
+               新可用 = 新总册数 - 已借出
+           这个差额由 Service 算好，通过 availableNum 参数传进来。
+
+         ★ 所有字段都要带 dto. 前缀：因为 UpdateBook 有三个参数，
+           MyBatis 把它们装进一个 Map，不带前缀会抛（实测原话）：
+           BindingException: Parameter 'isbn' not found.
+           Available parameters are [id, availableNum, param3, param1, dto, param2]
+
+         ★ update_time 不写，book 表那一列有 ON UPDATE CURRENT_TIMESTAMP，MySQL 自己维护。 -->
+    <update id="UpdateBook">
+        UPDATE book
+        SET isbn = #{dto.isbn},
+            name = #{dto.name},
+            author = #{dto.author},
+            publisher = #{dto.publisher},
+            publish_date = #{dto.publishDate},
+            category_id = #{dto.categoryId},
+            price = #{dto.price},
+            total_num = #{dto.totalNum},
+            available_num = #{availableNum},
+            cover_url = #{dto.coverUrl},
+            intro = #{dto.intro},
+            status = #{dto.status}
+        WHERE id = #{id}
+    </update>
+
+    <!-- 删除图书 -->
+    <delete id="DeleteBook">
+        DELETE FROM book
+        WHERE id = #{id}
+    </delete>
+
+    <!-- ================= 上架/下架图书 ================= -->
+    <!--如果status为0，则改为1，否则改为0。-->
+    <update id="UpdateBookStatus">
+        UPDATE book
+        SET status = #{status}
+        WHERE id = #{id}
+    </update>
+
+</mapper>
+
