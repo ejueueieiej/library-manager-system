@@ -11,6 +11,13 @@ spring:
     username: ${DB_USER:root}
     driver-class-name: com.mysql.cj.jdbc.Driver
     password: ${DB_PASSWORD:123456}
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:123456}
+      database: ${REDIS_DB:0}
+      timeout: ${REDIS_TIMEOUT:60000}
 
 # mybatis 配置
 mybatis:

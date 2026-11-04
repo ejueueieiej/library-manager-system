@@ -9,21 +9,28 @@ import org.libaray_manager_system.pojo.entity.Book;
 import org.libaray_manager_system.pojo.entity.Category;
 import org.libaray_manager_system.pojo.bookpageResult;
 import org.libaray_manager_system.service.BookService;
+import org.libaray_manager_system.utils.CacheUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @Slf4j
 public class BookServiceImpl implements BookService {
     @Autowired
     private BookMapper bookMapper;
+    @Autowired
+    private CacheUtil cacheUtil;
 
     @Override
     public List<Category> GetAllCategories() {
-        return bookMapper.GetAllCategories();
+        return cacheUtil.queryListWithPassThrough(
+                CacheUtil.CACHE_CATEGORY_KEY, Category.class,bookMapper::GetAllCategories,cacheUtil.CACHE_CATEGORY_TIME,TimeUnit.MINUTES);
+
     }
 
     @Override
@@ -37,7 +44,12 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public Book GetBookById(Integer id) {
-        return bookMapper.GetBookById(id);
+        Book book = cacheUtil.queryWithPassThrough(
+                CacheUtil.CACHE_BOOK_KEY, id, Book.class, bookMapper::GetBookById, CacheUtil.CACHE_BOOK_TIME, TimeUnit.MINUTES);
+        if(book == null){
+            throw new BusinessException("图书不存在");
+        }
+        return book;
     }
 
     /* ==================== 新增图书 ==================== */
@@ -75,6 +87,11 @@ public class BookServiceImpl implements BookService {
         // available_num 不在这里赋值 —— XML 里直接写的 #{totalNum}，
         // 让「可借册数 = 总册数」这件事在 SQL 层面就定死，前端传什么都改不动它。
         bookMapper.InsertBook(bookSaveDto);
+        // 新增也要删：可能有人之前查过这个 id，缓存里留着一条"空值"标记
+        // （id 由 useGeneratedKeys 回填；万一没回填就别拼出 "Cache:Book:null" 这种脏 key）
+        if (bookSaveDto.getId() != null) {
+            cacheUtil.deleteKey(CacheUtil.CACHE_BOOK_KEY + bookSaveDto.getId());
+        }
     }
 
     /**
@@ -196,6 +213,7 @@ public class BookServiceImpl implements BookService {
             // 把这本书删了，这里能兜住，避免明明没改成功却返回「修改成功」骗人。
             throw new BusinessException("图书不存在");
         }
+        cacheUtil.deleteKey(CacheUtil.CACHE_BOOK_KEY+id);
     }
 
     //    删除图书
@@ -212,6 +230,7 @@ public class BookServiceImpl implements BookService {
             throw new BusinessException("该图书已被借出，不能删除");
         }
         bookMapper.DeleteBook(id);
+        cacheUtil.deleteKey(CacheUtil.CACHE_BOOK_KEY + id);
     }
 
     //上架/下架图书
@@ -228,6 +247,7 @@ public class BookServiceImpl implements BookService {
         // 直接用前端传的目标状态，不做翻转！
         // 前端 el-switch 已经把开关拨到目标值了，传过来的就是"我想要的状态"
         bookMapper.UpdateBookStatus(id, status);
+        cacheUtil.deleteKey(CacheUtil.CACHE_BOOK_KEY + id);
         return status == 1 ? "已上架" : "已下架";
     }
 }

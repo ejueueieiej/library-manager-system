@@ -12,6 +12,7 @@ import org.libaray_manager_system.pojo.entity.LoginUser;
 import org.libaray_manager_system.pojo.vo.BorrowSummaryVo;
 import org.libaray_manager_system.pojo.vo.BorrowVo;
 import org.libaray_manager_system.service.BorrowService;
+import org.libaray_manager_system.utils.CacheUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,6 +40,8 @@ public class BorrowServiceImpl implements BorrowService {
     private BorrowMapper borrowMapper;
     @Autowired
     private BookMapper bookMapper;
+    @Autowired
+    private CacheUtil cacheUtil;
 
     @Override
     @Transactional
@@ -69,6 +72,9 @@ public class BorrowServiceImpl implements BorrowService {
 
         LocalDateTime now = LocalDateTime.now();
         borrowMapper.InsertBorrow(loginUser.getId(), dto.getBookId(), now, now.plusDays(BORROW_DAYS));
+
+        // 库存变了，详情缓存必须失效，否则详情页还显示旧的可借数
+        cacheUtil.deleteKey(CacheUtil.CACHE_BOOK_KEY + dto.getBookId());
     }
 
     @Override
@@ -124,6 +130,7 @@ public class BorrowServiceImpl implements BorrowService {
             throw new BusinessException("该借阅记录已归还，请勿重复操作");
         }
         borrowMapper.IncreaseAvailable(record.getBookId());
+        cacheUtil.deleteKey(CacheUtil.CACHE_BOOK_KEY + record.getBookId());
     }
 
     @Override
@@ -168,6 +175,7 @@ public class BorrowServiceImpl implements BorrowService {
             throw new BusinessException("该借阅已被取消，请勿重复操作");
         }
         borrowMapper.IncreaseAvailable(record.getBookId());
+        cacheUtil.deleteKey(CacheUtil.CACHE_BOOK_KEY + record.getBookId());
     }
 
     @Override

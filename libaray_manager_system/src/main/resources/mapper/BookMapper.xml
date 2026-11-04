@@ -93,7 +93,7 @@
            这样「可借册数 = 总册数」是在 SQL 层面定死的，
            前端就算偷偷传了 availableNum 也影响不到它，比在 Java 里赋值更保险。
          ★ create_time / update_time 不写，交给 MySQL 的 DEFAULT CURRENT_TIMESTAMP。 -->
-    <insert id="InsertBook">
+    <insert id="InsertBook" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO book (isbn, name, author, publisher, publish_date, category_id,
                           price, total_num, available_num, cover_url, intro, status)
         VALUES (#{isbn}, #{name}, #{author}, #{publisher}, #{publishDate}, #{categoryId},

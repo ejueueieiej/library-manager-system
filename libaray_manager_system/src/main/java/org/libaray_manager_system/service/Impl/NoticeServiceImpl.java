@@ -10,18 +10,22 @@ import org.libaray_manager_system.pojo.noticePageResult;
 import org.libaray_manager_system.pojo.vo.NoticeDetailVo;
 import org.libaray_manager_system.pojo.vo.NoticeVo;
 import org.libaray_manager_system.service.NoticeService;
+import org.libaray_manager_system.utils.CacheUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class NoticeServiceImpl implements NoticeService {
 
     @Autowired
     private NoticeMapper noticeMapper;
+    @Autowired
+    private CacheUtil cacheUtil;
 
     @Override
     public noticePageResult GetNotices(NoticeSelectDto dto, LoginUser loginUser) {
@@ -37,20 +41,33 @@ public class NoticeServiceImpl implements NoticeService {
 
     @Override
     public NoticeDetailVo GetNoticeById(Long id, LoginUser loginUser) {
-        Notice notice = noticeMapper.GetNoticeEntityById(id);
+//        Notice notice = noticeMapper.GetNoticeEntityById(id);
+//        if (notice == null) {
+//            throw new BusinessException("通知不存在");
+//        }
+//        if (notice.getStatus() == 0 && !loginUser.isAdmin()) {
+//            throw new BusinessException("通知不存在或已下架");
+//        }
+//
+//        // 标记已读只对普通读者做，并且必须在"通知可见"校验之后
+//        if (!loginUser.isAdmin()) {
+//            noticeMapper.InsertRead(id, loginUser.getId());
+//        }
+//        return noticeMapper.GetNoticeById(id, loginUser.getId());
+        Notice notice =cacheUtil.queryWithPassThrough(
+                cacheUtil.CACHE_NOTICE_KEY,id,Notice.class,noticeMapper::GetNoticeEntityById,cacheUtil.CACHE_NOTICE_TIME, TimeUnit.MINUTES);
         if (notice == null) {
             throw new BusinessException("通知不存在");
         }
         if (notice.getStatus() == 0 && !loginUser.isAdmin()) {
             throw new BusinessException("通知不存在或已下架");
         }
-
-        // 标记已读只对普通读者做，并且必须在"通知可见"校验之后
         if (!loginUser.isAdmin()) {
-            noticeMapper.InsertRead(id, loginUser.getId());
+            noticeMapper.InsertRead(id, loginUser.getId());   // 仍然实时写
         }
-        return noticeMapper.GetNoticeById(id, loginUser.getId());
+        return noticeMapper.GetNoticeById(id, loginUser.getId());  // is_read 仍然实时查
     }
+
 
     @Override
     public Integer GetUnreadCount(LoginUser loginUser) {
@@ -73,6 +90,7 @@ public class NoticeServiceImpl implements NoticeService {
         notice.setPublisherId(loginUser.getId().longValue());
         notice.setPublishTime(LocalDateTime.now());
         noticeMapper.Insert(notice);
+        cacheUtil.deleteKey(CacheUtil.CACHE_NOTICE_KEY + notice.getId());
     }
 
     @Override
@@ -90,6 +108,7 @@ public class NoticeServiceImpl implements NoticeService {
         notice.setIsTop(dto.getIsTop() == null ? 0 : dto.getIsTop());
         notice.setStatus(dto.getStatus() == null ? 1 : dto.getStatus());
         noticeMapper.UpdateById(notice);
+        cacheUtil.deleteKey(CacheUtil.CACHE_NOTICE_KEY+id);
     }
 
     @Override
@@ -101,6 +120,7 @@ public class NoticeServiceImpl implements NoticeService {
             throw new BusinessException("通知不存在");
         }
         noticeMapper.UpdateTop(id, isTop);
+        cacheUtil.deleteKey(CacheUtil.CACHE_NOTICE_KEY+id);
     }
 
     @Override
@@ -112,6 +132,7 @@ public class NoticeServiceImpl implements NoticeService {
         // 两步必须同生共死：只删成功一半会留下孤儿已读记录，或让通知"复活"成全未读
         noticeMapper.DeleteReadByNoticeId(id);
         noticeMapper.DeleteById(id);
+        cacheUtil.deleteKey(CacheUtil.CACHE_NOTICE_KEY+id);
     }
 
     /** 发布与编辑共用的字段校验 */
