@@ -1,7 +1,9 @@
 import axios from 'axios'
 import { ElMessage } from 'element-plus'
 
-const TOKEN_KEY = 'library_token'
+// export 出去是为了让阅读页"关标签前的 keepalive 保存"也用同一个 key，
+// 避免在别处再硬编码一遍 'library_token'
+export const TOKEN_KEY = 'library_token'
 
 /**
  * 未登录时的回调（2.0 新增）

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.libaray_manager_system.mapper.ReaderProgressMapper">
+
+    <select id="Get" resultType="ReaderProgress">
+        SELECT id, user_id, target_type, target_id, chapter_index, chapter_title, percent, update_time
+        FROM reader_progress
+        WHERE user_id = #{userId}
+          AND target_type = #{targetType}
+          AND target_id = #{targetId}
+    </select>
+
+    <!-- 一个人对一个目标只有一条进度，撞唯一索引就更新 -->
+    <insert id="Save">
+        INSERT INTO reader_progress (user_id, target_type, target_id, chapter_index, chapter_title, percent)
+        VALUES (#{userId}, #{targetType}, #{targetId}, #{chapterIndex}, #{chapterTitle}, #{percent})
+        ON DUPLICATE KEY UPDATE chapter_index = VALUES(chapter_index),
+                                chapter_title = VALUES(chapter_title),
+                                percent       = VALUES(percent)
+    </insert>
+
+    <delete id="DeleteByTarget">
+        DELETE FROM reader_progress
+        WHERE target_type = #{targetType}
+          AND target_id = #{targetId}
+    </delete>
+    <!-- 注销用户：清掉他的全部阅读进度 -->
+    <delete id="DeleteByUser">
+        DELETE FROM reader_progress WHERE user_id = #{userId}
+    </delete>
+
+</mapper>

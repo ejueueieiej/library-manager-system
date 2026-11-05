@@ -119,4 +119,10 @@
         WHERE notice_id = #{noticeId}
     </delete>
 
+    <!-- 注销用户：清掉他的已读记录 -->
+    <delete id="DeleteReadByUserId">
+        DELETE FROM notice_read
+        WHERE user_id = #{userId}
+    </delete>
+
 </mapper>

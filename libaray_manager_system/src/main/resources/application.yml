@@ -18,6 +18,12 @@ spring:
       password: ${REDIS_PASSWORD:123456}
       database: ${REDIS_DB:0}
       timeout: ${REDIS_TIMEOUT:60000}
+# 文件上传--一个文件最大 10MB
+#         整个请求最大 12MB
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 12MB
 
 # mybatis 配置
 mybatis:

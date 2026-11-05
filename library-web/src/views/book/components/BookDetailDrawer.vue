@@ -85,6 +85,8 @@
 
     <template #footer>
       <el-button @click="emit('update:modelValue', false)">关闭</el-button>
+      <!-- 4.0：有电子版才显示在线阅读（readable 由后端返回，1 = 已开启且有正文） -->
+      <el-button v-if="book && book.readable === 1" @click="openReader">在线阅读</el-button>
       <!-- 只有管理员看得到「编辑」—— 普通用户在这里也不能改任何东西 -->
       <el-button v-if="isAdmin" type="primary" @click="emit('edit', book)">编辑这本</el-button>
     </template>
@@ -95,6 +97,7 @@
 import { computed } from 'vue'
 import DateTimeCell from '@/components/DateTimeCell.vue'
 import { useUserStore } from '@/store/user'
+import { useRouter } from 'vue-router'
 
 /** 这本书没写简介时，显示的占位文案（比干巴巴的"暂无简介"友好一点） */
 const EMPTY_INTRO = '该书本暂时没有详情介绍，奇妙的内容等待着你的探索~'
@@ -109,6 +112,14 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue', 'edit'])
 
 const { isAdmin } = useUserStore()
+const router = useRouter()
+
+/** 4.0：进阅读页。readable=1 表示管理员上传了正文并开启了在线阅读 */
+function openReader() {
+  if (!props.book?.id) return
+  emit('update:modelValue', false)
+  router.push(`/read/book/${props.book.id}`)
+}
 
 /**
  * 简介文案

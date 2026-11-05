@@ -4,6 +4,9 @@ import cn.hutool.crypto.digest.BCrypt;
 import org.libaray_manager_system.exception.BusinessException;
 import org.libaray_manager_system.mapper.BorrowMapper;
 import org.libaray_manager_system.mapper.LoginMapper;
+import org.libaray_manager_system.mapper.NoticeMapper;
+import org.libaray_manager_system.mapper.ReaderFileMapper;
+import org.libaray_manager_system.mapper.ReaderProgressMapper;
 import org.libaray_manager_system.mapper.UserMapper;
 import org.libaray_manager_system.pojo.dto.LoginDto;
 import org.libaray_manager_system.pojo.dto.UserDeleteDto;
@@ -14,6 +17,7 @@ import org.libaray_manager_system.pojo.vo.UserVo;
 import org.libaray_manager_system.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -25,6 +29,12 @@ public class UserServiceImpl implements UserService {
     private LoginMapper loginMapper;
     @Autowired
     private BorrowMapper borrowMapper;
+    @Autowired
+    private ReaderFileMapper readerFileMapper;
+    @Autowired
+    private ReaderProgressMapper readerProgressMapper;
+    @Autowired
+    private NoticeMapper noticeMapper;
     @Override
     public void UpdatePassword(LoginUser loginUser,LoginDto loginDto) {
         if(loginDto.getNewPassword()==null||loginDto.getOldPassword()==null
@@ -126,6 +136,7 @@ public class UserServiceImpl implements UserService {
 
     //删除指定用户
     @Override
+    @Transactional
     public void DeleteUser(Integer id, LoginUser loginUser) {
         if(userMapper.GetUserById(id)==null){
             throw new BusinessException("用户不存在");
@@ -141,12 +152,31 @@ public class UserServiceImpl implements UserService {
         if(borrowMapper.CountBorrowingByUser(id)>0){
             throw new BusinessException("该用户还有未归还的图书，不能删除");
         }
+        // 先清他散落在各表的数据，再删用户本身
+        ClearUserData(id);
         //删除用户
         userMapper.DeleteUser(id);
 
     }
+
+    /**
+     * 清掉这个用户散落在各表里的行。
+     *
+     * 这几张表都没有外键（建表时没建，避免影响原有数据），所以删用户【不会】级联删除。
+     * 不手动清的后果是孤儿数据：文件永远占着磁盘空间、查询也永远查不到它；
+     * 阅读进度和已读记录同理。
+     *
+     * borrow_record 故意不在这里 —— 那是借阅历史，要留档。
+     */
+    private void ClearUserData(Integer userId) {
+        readerFileMapper.DeleteByUser(userId);
+        readerProgressMapper.DeleteByUser(userId);
+        noticeMapper.DeleteReadByUserId(userId);
+    }
+
 //    用户注销
     @Override
+    @Transactional
     public void LogoutUser(UserDeleteDto userDeleteDto, LoginUser loginUser) {
         if(userDeleteDto.getPassword()==null){
             throw new BusinessException("请输入密码以确认注销");
@@ -163,6 +193,7 @@ public class UserServiceImpl implements UserService {
         if(borrowMapper.CountBorrowingByUser(loginUser.getId())>0){
             throw new BusinessException("你还有未归还的图书，请先归还后再注销账号");
         }
+        ClearUserData(loginUser.getId());
         userMapper.DeleteByUsername(loginUser.getUsername());
     }
     @Override

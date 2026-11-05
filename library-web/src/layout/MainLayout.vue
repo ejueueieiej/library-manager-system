@@ -13,7 +13,7 @@
         <img class="brand-mark" src="/brand/logo.svg" alt="星河图书" width="28" height="28" />
         <span class="brand-text">
           <span class="brand-name">星河图书</span>
-          <span class="brand-sub mono">LIBRARY · v3.0</span>
+          <span class="brand-sub mono">LIBRARY · v4.0</span>
         </span>
       </div>
 
@@ -36,6 +36,11 @@
           <!-- 未读红点（3.0）：数字从 /notices/unread-count 来。
                ⚠️ 它只是个提示，不是权限 —— 后端没实现时这里就是不显示，不影响别的功能 -->
           <span v-if="hasUnread" class="badge tnum">{{ badgeText }}</span>
+        </router-link>
+
+        <router-link to="/my-files" class="nav-item" active-class="is-active">
+          <el-icon><Notebook /></el-icon>
+          <span>我的书库</span>
         </router-link>
 
         <div class="nav-label is-gap">借阅</div>

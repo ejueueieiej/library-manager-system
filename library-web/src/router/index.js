@@ -80,12 +80,28 @@ const routes = [
         meta: { title: '用户管理', roles: ['ADMIN'] }
       },
       {
+        // 4.0：我的书库（用户自己上传的 txt）
+        path: 'my-files',
+        name: 'myFiles',
+        component: () => import('@/views/reader/MyFilesView.vue'),
+        meta: { title: '我的书库' }
+      },
+      {
         path: 'profile',
         name: 'profile',
         component: () => import('@/views/profile/ProfileView.vue'),
         meta: { title: '个人中心' }
       }
     ]
+  },
+  {
+    // 4.0 阅读页：★ 故意做成【平级路由】，不套 MainLayout
+    // 沉浸感是这个页面的全部价值 —— 留着 220px 侧边栏就没有"在读书"的感觉了。
+    // type = 'book'（书籍正文）| 'file'（用户上传的 txt）
+    path: '/read/:type/:id',
+    name: 'reader',
+    component: () => import('@/views/reader/ReaderView.vue'),
+    meta: { title: '阅读' }
   },
   {
     // 404 兜底：必须放最后

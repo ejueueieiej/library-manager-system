@@ -28,6 +28,9 @@
             <if test="status != null">
                 AND b.status = #{status}
             </if>
+            <if test="readable != null">
+                AND b.readable = #{readable}
+            </if>
         </where>
     </select>
 
@@ -51,6 +54,9 @@
             </if>
             <if test="bookQuerySelectDto.status != null">
                 AND b.status = #{bookQuerySelectDto.status}
+            </if>
+            <if test="bookQuerySelectDto.readable != null">
+                AND b.readable = #{bookQuerySelectDto.readable}
             </if>
         </where>
         ORDER BY b.create_time DESC, b.id DESC
@@ -145,6 +151,9 @@
         SET status = #{status}
         WHERE id = #{id}
     </update>
-
+<!--更新可读状态-->
+    <update id="UpdateReadable">
+        UPDATE book SET readable = #{readable} WHERE id = #{id}
+    </update>
 </mapper>
 

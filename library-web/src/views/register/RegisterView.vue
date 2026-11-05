@@ -6,7 +6,7 @@
         <img class="brand-mark" src="/brand/logo.svg" alt="星河图书" width="30" height="30" />
         <div class="brand-text">
           <div class="brand-name">星河图书</div>
-          <div class="brand-sub mono">LIBRARY · v2.0</div>
+          <div class="brand-sub mono">LIBRARY · v4.0</div>
         </div>
       </div>
 

@@ -37,7 +37,7 @@
         </ul>
       </div>
 
-      <div class="brand-foot mono">LIBRARY · v3.0</div>
+      <div class="brand-foot mono">LIBRARY · v4.0</div>
     </aside>
 
     <!-- ================= 右：表单区 ================= -->

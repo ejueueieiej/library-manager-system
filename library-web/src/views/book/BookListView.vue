@@ -15,6 +15,18 @@
         </el-button>
       </div>
 
+      <!-- 4.0：是否可读，和上面「状态」同一套分段控件 -->
+      <div class="segmented">
+        <el-button
+          v-for="opt in readableOptions"
+          :key="String(opt.value)"
+          :type="queryParams.readable === opt.value ? 'primary' : 'default'"
+          @click="handleReadableFilter(opt.value)"
+        >
+          {{ opt.label }}
+        </el-button>
+      </div>
+
       <div class="filter-set">
         <!-- 书号：和其他条件一样，走 GET /books 的分页查询，精确匹配 -->
         <el-input
@@ -96,6 +108,8 @@
           <template #default="{ row }">
             <!-- 书名可点：管理员进编辑弹窗，普通用户开详情抽屉 -->
             <a class="book-name is-link" @click="handleNameClick(row)">{{ row.name }}</a>
+            <!-- 4.0：这本书有电子版可在线读 -->
+            <span v-if="row.readable === 1" class="read-tag">可读</span>
             <div class="book-isbn mono">{{ row.isbn }}</div>
           </template>
         </el-table-column>
@@ -148,11 +162,15 @@
         <!-- 操作列：管理员能编辑/删除；普通用户有详情。
              3.0 起两种角色都能「借阅」（管理员也是读者，
              这样你自己联调时不用来回换账号登） -->
-        <el-table-column label="操作" :width="isAdmin ? 168 : 122" align="right">
+        <el-table-column label="操作" :width="isAdmin ? 280 : 184" align="right">
           <template #default="{ row }">
+            <!-- 4.0：只有开启了在线阅读的书才显示「阅读」，直接跳阅读页 -->
+            <el-button v-if="row.readable === 1" link @click="handleRead(row)">阅读</el-button>
             <el-button link @click="handleBorrow(row)">借阅</el-button>
             <template v-if="isAdmin">
               <el-button link @click="handleEdit(row)">编辑</el-button>
+              <!-- 4.0：电子书（上传正文 + 开启阅读） -->
+              <el-button link @click="handleContent(row)">电子书</el-button>
               <el-button link type="danger" @click="handleDelete(row)">删除</el-button>
             </template>
             <el-button v-else link @click="handleDetail(row)">详情</el-button>
@@ -190,15 +208,20 @@
 
     <!-- 图书详情抽屉：普通用户的核心功能；管理员也可以用它快速看一眼 -->
     <book-detail-drawer v-model="detailVisible" :book="detailBook" @edit="handleDetailEdit" />
+
+    <!-- 4.0：电子书管理（仅管理员打开） -->
+    <book-content-dialog v-model="contentVisible" :book="contentBook" @change="loadBooks" />
   </div>
 </template>
 
 <script setup>
 import { onMounted, reactive, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { useRouter } from 'vue-router'
 
 import BookDetailDrawer from './components/BookDetailDrawer.vue'
 import BookFormDialog from './components/BookFormDialog.vue'
+import BookContentDialog from './components/BookContentDialog.vue'
 import { borrowBook } from '@/api/borrow'
 import {
   deleteBook,
@@ -213,6 +236,12 @@ import { useUserStore } from '@/store/user'
 // ⚠️ 这只是"不显示用不上的东西"，真正的权限控制在后端（@RequireAdmin 注解）——
 //    前端藏按钮挡不住直接用 Apifox 调接口的人。
 const { isAdmin } = useUserStore()
+const router = useRouter()
+
+/** 4.0：直接从列表进阅读页，省掉"先开详情抽屉再点在线阅读"那一步 */
+function handleRead(row) {
+  if (row?.id) router.push(`/read/book/${row.id}`)
+}
 
 /* ---------------- 查询条件（与接口 2 的参数一一对应） ---------------- */
 const queryParams = reactive({
@@ -222,7 +251,9 @@ const queryParams = reactive({
   name: '',
   author: '',
   categoryId: null,
-  status: null
+  status: null,
+  // 4.0：是否可在线读（null=全部 / 1=可读 / 0=不可读）
+  readable: null
 })
 
 // 状态分段控件：只放接口真正支持的三种（不造后端没有的筛选项）
@@ -230,6 +261,13 @@ const statusOptions = [
   { label: '全部', value: null },
   { label: '在架', value: 1 },
   { label: '下架', value: 0 }
+]
+
+// 4.0：是否可读分段控件（和状态同一套样式）
+const readableOptions = [
+  { label: '全部', value: null },
+  { label: '可读', value: 1 },
+  { label: '不可读', value: 0 }
 ]
 
 /* ---------------- 列表数据 ---------------- */
@@ -247,6 +285,15 @@ const currentBookId = ref(null)
 /* ---------------- 详情抽屉状态 ---------------- */
 const detailVisible = ref(false)
 const detailBook = ref(null)
+
+// 4.0 电子书管理（仅管理员会打开）
+const contentVisible = ref(false)
+const contentBook = ref(null)
+
+function handleContent(row) {
+  contentBook.value = row
+  contentVisible.value = true
+}
 
 /* ---------------- 查询分类（接口 1） ---------------- */
 async function loadCategories() {
@@ -280,6 +327,12 @@ function handleStatusFilter(value) {
   handleSearch()
 }
 
+// 4.0：是否可读
+function handleReadableFilter(value) {
+  queryParams.readable = value
+  handleSearch()
+}
+
 function handleSearch() {
   queryParams.pageNum = 1 // 换条件后必须回到第一页
   loadBooks()
@@ -291,6 +344,7 @@ function handleReset() {
   queryParams.author = ''
   queryParams.categoryId = null
   queryParams.status = null
+  queryParams.readable = null
   handleSearch()
 }
 
@@ -581,6 +635,18 @@ onMounted(() => {
   border: 1px solid var(--line);
   color: var(--ink-3);
   font-size: 12px;
+}
+
+/* 4.0「可读」小标签：描边样式，不用实心黑块 —— 它只是状态提示，不该抢注意力 */
+.read-tag {
+  margin-left: 6px;
+  font-size: 10.5px;
+  line-height: 1;
+  padding: 2px 5px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-sm);
+  color: var(--ink-4);
+  white-space: nowrap;
 }
 
 .book-name {

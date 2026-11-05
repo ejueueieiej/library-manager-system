@@ -35,4 +35,7 @@ public interface NoticeMapper {
     void DeleteById(@Param("id") Long id);
 
     void DeleteReadByNoticeId(@Param("noticeId") Long noticeId);
+
+    // 注销用户时清掉他的已读记录
+    void DeleteReadByUserId(@Param("userId") Integer userId);
 }

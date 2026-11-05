@@ -16,5 +16,7 @@ public class BookQuerySelectDto {
     private String author;
     private Integer categoryId;
     private Integer status;
+    // 4.0：是否可在线读（1=可读 0=不可读 null=全部）
+    private Integer readable;
     private String isbn;
 }

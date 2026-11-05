@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.libaray_manager_system.mapper.BookContentMapper">
+
+    <select id="GetByBookId" resultType="BookContent">
+        SELECT book_id, content, word_count, encoding, create_time, update_time
+        FROM book_content
+        WHERE book_id = #{bookId}
+    </select>
+
+    <insert id="Save">
+        INSERT INTO book_content (book_id, content, word_count, encoding)
+        VALUES (#{bookId}, #{content}, #{wordCount}, #{encoding})
+        ON DUPLICATE KEY UPDATE content    = VALUES(content),
+                                word_count = VALUES(word_count),
+                                encoding   = VALUES(encoding)
+    </insert>
+
+    <delete id="DeleteByBookId">
+        DELETE FROM book_content WHERE book_id = #{bookId}
+    </delete>
+
+</mapper>

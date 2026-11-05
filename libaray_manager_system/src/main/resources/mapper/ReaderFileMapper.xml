@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.libaray_manager_system.mapper.ReaderFileMapper">
+
+    <!-- 列表与总数共用的筛选条件：抽出来只写一份，
+         从结构上保证两边条件永远一致（否则会出现"列表 3 条、分页器说 100 条"） -->
+    <sql id="fileWhere">
+        <where>
+            AND user_id = #{userId}
+            <if test="dto.title != null and dto.title != ''">
+                AND title LIKE CONCAT('%', #{dto.title}, '%')
+            </if>
+        </where>
+    </sql>
+
+    <!-- 自增主键回填到 file.id：Service 要靠它返回给前端跳阅读页 -->
+    <insert id="Save" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO reader_file (user_id, title, content, word_count, chapter_count, encoding)
+        VALUES (#{userId}, #{title}, #{content}, #{wordCount}, #{chapterCount}, #{encoding})
+    </insert>
+
+    <select id="GetByIdAndUser" resultType="ReaderFile">
+        SELECT id, user_id, title, content, word_count, chapter_count, encoding, create_time
+        FROM reader_file
+        WHERE id = #{id}
+          AND user_id = #{userId}
+    </select>
+
+    <!-- ★ 不查 content：列表只要标题/字数/章数 -->
+    <select id="GetMyFiles" resultType="ReaderFile">
+        SELECT id, user_id, title, word_count, chapter_count, encoding, create_time
+        FROM reader_file
+        <include refid="fileWhere"/>
+        ORDER BY create_time DESC
+        LIMIT #{startIndex}, #{dto.pageSize}
+    </select>
+
+    <select id="GetMyFileCount" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM reader_file
+        <include refid="fileWhere"/>
+    </select>
+
+    <delete id="DeleteByIdAndUser">
+        DELETE FROM reader_file
+        WHERE id = #{id}
+          AND user_id = #{userId}
+    </delete>
+    <!-- 重命名：只动 title，正文和字数都不变 -->
+    <update id="UpdateTitle">
+        UPDATE reader_file
+        SET title = #{title}
+        WHERE id = #{id}
+          AND user_id = #{userId}
+    </update>
+    <!-- 注销用户：清掉他上传的全部文件 -->
+    <delete id="DeleteByUser">
+        DELETE FROM reader_file WHERE user_id = #{userId}
+    </delete>
+
+</mapper>

@@ -28,5 +28,5 @@ public class Book {
     private Integer status;
     private LocalDateTime createTime;
     private LocalDateTime updateTime;
-
+    private Integer readable;  // ← 4.0 新增：1=开启在线阅读
 }

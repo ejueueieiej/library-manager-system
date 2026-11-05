@@ -57,4 +57,6 @@ public interface BookMapper {
     void DeleteBook(Integer id);
 
     void UpdateBookStatus(Integer id, Integer status);
+
+    int UpdateReadable(@Param("id") Integer id, @Param("readable") Integer readable);
 }
