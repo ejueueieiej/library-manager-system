@@ -3,7 +3,7 @@ package org.libaray_manager_system.service;
 import org.libaray_manager_system.pojo.dto.ReaderFileSelectDto;
 import org.libaray_manager_system.pojo.dto.ReaderProgressDto;
 import org.libaray_manager_system.pojo.entity.LoginUser;
-import org.libaray_manager_system.pojo.readerFilePageResult;
+import org.libaray_manager_system.pojo.ReaderFilePageResult;
 import org.libaray_manager_system.pojo.vo.ReaderChapterVo;
 import org.libaray_manager_system.pojo.vo.ReaderFileVo;
 import org.libaray_manager_system.pojo.vo.ReaderMetaVo;
@@ -45,7 +45,7 @@ public interface ReaderService {
     ReaderFileVo UploadFile(MultipartFile file, String title, LoginUser loginUser);
 
     /** 我的文件列表（分页，只返回自己的） */
-    readerFilePageResult GetMyFiles(ReaderFileSelectDto dto, LoginUser loginUser);
+    ReaderFilePageResult GetMyFiles(ReaderFileSelectDto dto, LoginUser loginUser);
 
     /** 单个文件的基本信息 */
     ReaderFileVo GetFileInfo(Long fileId, LoginUser loginUser);

@@ -1,17 +1,16 @@
-// ========== ⑨ pojo/readerFilePageResult.java ==========
 package org.libaray_manager_system.pojo;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.libaray_manager_system.pojo.vo.ReaderFileVo;
+import org.libaray_manager_system.pojo.vo.BorrowVo;
 
 import java.util.List;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class readerFilePageResult {
+public class BorrowPageResult {
     private Integer total;
-    private List<ReaderFileVo> list;
+    private List<BorrowVo> list;
 }

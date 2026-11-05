@@ -1,4 +1,4 @@
-package org.libaray_manager_system.service.Impl;
+package org.libaray_manager_system.service.impl;
 
 import cn.hutool.crypto.digest.BCrypt;
 import org.libaray_manager_system.exception.BusinessException;

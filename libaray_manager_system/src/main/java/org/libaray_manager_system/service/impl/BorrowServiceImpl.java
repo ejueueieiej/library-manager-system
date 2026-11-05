@@ -1,9 +1,9 @@
-package org.libaray_manager_system.service.Impl;
+package org.libaray_manager_system.service.impl;
 
 import org.libaray_manager_system.exception.BusinessException;
 import org.libaray_manager_system.mapper.BookMapper;
 import org.libaray_manager_system.mapper.BorrowMapper;
-import org.libaray_manager_system.pojo.borrowPageResult;
+import org.libaray_manager_system.pojo.BorrowPageResult;
 import org.libaray_manager_system.pojo.dto.BorrowCreateDto;
 import org.libaray_manager_system.pojo.dto.BorrowSelectDto;
 import org.libaray_manager_system.pojo.entity.Book;
@@ -78,13 +78,13 @@ public class BorrowServiceImpl implements BorrowService {
     }
 
     @Override
-    public borrowPageResult GetMyBorrows(BorrowSelectDto dto, LoginUser loginUser) {
+    public BorrowPageResult GetMyBorrows(BorrowSelectDto dto, LoginUser loginUser) {
         Integer startIndex = (dto.getPageNum() - 1) * dto.getPageSize();
         List<BorrowVo> list = borrowMapper.GetMyBorrows(dto, loginUser.getId(), startIndex);
         list.forEach(this::FillComputed);
 
         Integer total = borrowMapper.GetMyBorrowCount(dto, loginUser.getId());
-        return new borrowPageResult(total, list);
+        return new BorrowPageResult(total, list);
     }
 
     @Override
@@ -93,13 +93,13 @@ public class BorrowServiceImpl implements BorrowService {
     }
 
     @Override
-    public borrowPageResult GetAllBorrows(BorrowSelectDto dto) {
+    public BorrowPageResult GetAllBorrows(BorrowSelectDto dto) {
         Integer startIndex = (dto.getPageNum() - 1) * dto.getPageSize();
         List<BorrowVo> list = borrowMapper.GetAllBorrows(dto, startIndex);
         list.forEach(this::FillComputed);
 
         Integer total = borrowMapper.GetAllBorrowCount(dto);
-        return new borrowPageResult(total, list);
+        return new BorrowPageResult(total, list);
     }
 
     @Override

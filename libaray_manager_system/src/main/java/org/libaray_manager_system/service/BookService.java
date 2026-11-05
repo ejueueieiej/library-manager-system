@@ -3,7 +3,7 @@ package org.libaray_manager_system.service;
 import org.libaray_manager_system.pojo.dto.BookQuerySelectDto;
 import org.libaray_manager_system.pojo.dto.BookSaveDto;
 import org.libaray_manager_system.pojo.entity.Category;
-import org.libaray_manager_system.pojo.bookpageResult;
+import org.libaray_manager_system.pojo.BookPageResult;
 import org.libaray_manager_system.pojo.entity.Book;
 
 
@@ -13,7 +13,7 @@ public interface BookService {
     List<Category> GetAllCategories();
 
 
-    bookpageResult GetAllBooks(BookQuerySelectDto bookQuerySelectDto);
+    BookPageResult GetAllBooks(BookQuerySelectDto bookQuerySelectDto);
 
     Book GetBookById(Integer id);
 

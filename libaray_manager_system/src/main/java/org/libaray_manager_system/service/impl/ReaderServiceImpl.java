@@ -1,4 +1,4 @@
-package org.libaray_manager_system.service.Impl;
+package org.libaray_manager_system.service.impl;
 
 import org.libaray_manager_system.exception.BusinessException;
 import org.libaray_manager_system.mapper.BookContentMapper;
@@ -12,7 +12,7 @@ import org.libaray_manager_system.pojo.entity.BookContent;
 import org.libaray_manager_system.pojo.entity.LoginUser;
 import org.libaray_manager_system.pojo.entity.ReaderFile;
 import org.libaray_manager_system.pojo.entity.ReaderProgress;
-import org.libaray_manager_system.pojo.readerFilePageResult;
+import org.libaray_manager_system.pojo.ReaderFilePageResult;
 import org.libaray_manager_system.pojo.vo.ChapterItemVo;
 import org.libaray_manager_system.pojo.vo.ReaderChapterVo;
 import org.libaray_manager_system.pojo.vo.ReaderFileVo;
@@ -194,12 +194,12 @@ public class ReaderServiceImpl implements ReaderService {
     }
 
     @Override
-    public readerFilePageResult GetMyFiles(ReaderFileSelectDto dto, LoginUser loginUser) {
+    public ReaderFilePageResult GetMyFiles(ReaderFileSelectDto dto, LoginUser loginUser) {
         ReaderFileSelectDto query = dto == null ? new ReaderFileSelectDto() : dto;
 
         Integer total = readerFileMapper.GetMyFileCount(query, loginUser.getId());
         if (total == null || total == 0) {
-            return new readerFilePageResult(0, new ArrayList<>());
+            return new ReaderFilePageResult(0, new ArrayList<>());
         }
 
         List<ReaderFile> rows = readerFileMapper.GetMyFiles(query, loginUser.getId(), StartIndex(query));
@@ -207,7 +207,7 @@ public class ReaderServiceImpl implements ReaderService {
         for (ReaderFile row : rows) {
             list.add(ToFileVo(row));
         }
-        return new readerFilePageResult(total, list);
+        return new ReaderFilePageResult(total, list);
     }
 
     @Override

@@ -1,4 +1,4 @@
-package org.libaray_manager_system.service.Impl;
+package org.libaray_manager_system.service.impl;
 
 import cn.hutool.crypto.digest.BCrypt;
 import org.libaray_manager_system.exception.BusinessException;
@@ -12,7 +12,6 @@ import org.libaray_manager_system.pojo.dto.LoginDto;
 import org.libaray_manager_system.pojo.dto.UserDeleteDto;
 import org.libaray_manager_system.pojo.dto.UserSelectDto;
 import org.libaray_manager_system.pojo.entity.LoginUser;
-import org.libaray_manager_system.pojo.entity.sysUser;
 import org.libaray_manager_system.pojo.vo.UserVo;
 import org.libaray_manager_system.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;

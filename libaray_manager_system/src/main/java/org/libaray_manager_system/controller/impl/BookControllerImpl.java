@@ -1,4 +1,4 @@
-package org.libaray_manager_system.controller.Impl;
+package org.libaray_manager_system.controller.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.libaray_manager_system.annotation.RequireAdmin;

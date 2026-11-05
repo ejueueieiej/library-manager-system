@@ -1,4 +1,4 @@
-package org.libaray_manager_system.service.Impl;
+package org.libaray_manager_system.service.impl;
 
 import org.libaray_manager_system.exception.BusinessException;
 import org.libaray_manager_system.mapper.NoticeMapper;
@@ -6,7 +6,7 @@ import org.libaray_manager_system.pojo.dto.NoticeSaveDto;
 import org.libaray_manager_system.pojo.dto.NoticeSelectDto;
 import org.libaray_manager_system.pojo.entity.LoginUser;
 import org.libaray_manager_system.pojo.entity.Notice;
-import org.libaray_manager_system.pojo.noticePageResult;
+import org.libaray_manager_system.pojo.NoticePageResult;
 import org.libaray_manager_system.pojo.vo.NoticeDetailVo;
 import org.libaray_manager_system.pojo.vo.NoticeVo;
 import org.libaray_manager_system.service.NoticeService;
@@ -28,7 +28,7 @@ public class NoticeServiceImpl implements NoticeService {
     private CacheUtil cacheUtil;
 
     @Override
-    public noticePageResult GetNotices(NoticeSelectDto dto, LoginUser loginUser) {
+    public NoticePageResult GetNotices(NoticeSelectDto dto, LoginUser loginUser) {
         if (!loginUser.isAdmin()) {
             dto.setStatus(1);
         }
@@ -36,7 +36,7 @@ public class NoticeServiceImpl implements NoticeService {
         Integer startIndex = (dto.getPageNum() - 1) * dto.getPageSize();
         List<NoticeVo> list = noticeMapper.GetNotices(dto, loginUser.getId(), startIndex);
         Integer total = noticeMapper.GetNoticeCount(dto);
-        return new noticePageResult(total, list);
+        return new NoticePageResult(total, list);
     }
 
     @Override

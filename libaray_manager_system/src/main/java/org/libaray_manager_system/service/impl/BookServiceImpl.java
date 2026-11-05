@@ -1,4 +1,4 @@
-package org.libaray_manager_system.service.Impl;
+package org.libaray_manager_system.service.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.libaray_manager_system.exception.BusinessException;
@@ -7,11 +7,10 @@ import org.libaray_manager_system.pojo.dto.BookQuerySelectDto;
 import org.libaray_manager_system.pojo.dto.BookSaveDto;
 import org.libaray_manager_system.pojo.entity.Book;
 import org.libaray_manager_system.pojo.entity.Category;
-import org.libaray_manager_system.pojo.bookpageResult;
+import org.libaray_manager_system.pojo.BookPageResult;
 import org.libaray_manager_system.service.BookService;
 import org.libaray_manager_system.utils.CacheUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -34,11 +33,11 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public bookpageResult GetAllBooks(BookQuerySelectDto bookQuerySelectDto) {
+    public BookPageResult GetAllBooks(BookQuerySelectDto bookQuerySelectDto) {
         int total = bookMapper.GetTotal(bookQuerySelectDto);
         Integer BeginIndex=(bookQuerySelectDto.getPageNum()-1)*bookQuerySelectDto.getPageSize();
         List<Book> books = bookMapper.GetAllBooks(bookQuerySelectDto,BeginIndex);
-        bookpageResult pageresult = new bookpageResult(total, books);
+        BookPageResult pageresult = new BookPageResult(total, books);
         return pageresult;
     }
 

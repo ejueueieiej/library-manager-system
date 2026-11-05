@@ -9,7 +9,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class userpageResult {
+public class UserPageResult {
     private Integer total;
     private List<UserVo> list;
 }

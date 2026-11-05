@@ -3,13 +3,13 @@ package org.libaray_manager_system.service;
 import org.libaray_manager_system.pojo.dto.NoticeSaveDto;
 import org.libaray_manager_system.pojo.dto.NoticeSelectDto;
 import org.libaray_manager_system.pojo.entity.LoginUser;
-import org.libaray_manager_system.pojo.noticePageResult;
+import org.libaray_manager_system.pojo.NoticePageResult;
 import org.libaray_manager_system.pojo.vo.NoticeDetailVo;
 
 public interface NoticeService {
 
     /** 通知分页列表：管理员看全部，普通读者只看已发布的 */
-    noticePageResult GetNotices(NoticeSelectDto dto, LoginUser loginUser);
+    NoticePageResult GetNotices(NoticeSelectDto dto, LoginUser loginUser);
 
     /** 通知详情：普通读者打开时顺带标记已读 */
     NoticeDetailVo GetNoticeById(Long id, LoginUser loginUser);

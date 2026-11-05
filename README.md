@@ -1,7 +1,7 @@
 # 图书管理系统 · Library Manager System
 
 一个前后端分离的图书管理系统（课程项目）：后端提供 REST 接口，前端提供管理界面。
-支持**图书 / 分类 / 借阅归还 / 通知公告**四大模块，以及基于 **JWT** 的登录鉴权与 **ADMIN / USER** 两种角色的权限控制。
+支持**图书 / 分类 / 借阅归还 / 通知公告 / 在线阅读**五大模块，以及基于 **JWT** 的登录鉴权与 **ADMIN / USER** 两种角色的权限控制。
 
 ---
 
@@ -12,6 +12,7 @@
 | 图书管理 | 分类列表、图书分页查询与筛选、图书详情、新增 / 修改 / 删除、上架 / 下架 |
 | 借阅管理 | 借书、我的借阅、借阅概览统计、归还、续借、取消、借阅记录查询与删除 |
 | 通知公告 | 公告列表 / 详情、未读数统计、发布、修改、置顶、删除 |
+| 在线阅读 | 图书正文导入与分章、章节目录、正文阅读、阅读进度续读、读者上传 txt（自动识别 GBK/UTF-8 编码并切章）、我的文件管理 |
 | 用户与鉴权 | 注册、登录（JWT）、获取当前用户、登出、修改密码、用户管理（新增 / 修改 / 重置密码 / 启用禁用 / 删除）、注销账号 |
 
 权限模型：登录拦截器校验 `Authorization` 头里的 JWT，方法上标注 `@RequireAdmin` 的接口只有管理员可以调用（写操作基本都在这类里）。
@@ -22,7 +23,7 @@
 
 | 层次 | 技术 |
 | --- | --- |
-| 后端 | Spring Boot 4.0.8、Java 17、MyBatis、MySQL 8、PageHelper、jjwt 0.12.6、Lombok |
+| 后端 | Spring Boot 4.0.8、Java 17、MyBatis、MySQL 8、Redis（缓存）、PageHelper、jjwt 0.12.6、Lombok |
 | 前端 | Vue 3.5、Vite 6、Element Plus、Vue Router、Axios |
 | 鉴权 | JWT（HS256/HS384，有效期 2 小时）+ 自定义拦截器 |
 
@@ -43,8 +44,8 @@ library_manager_system/
 │       │   ├── interceptor/           # JWT 拦截器
 │       │   ├── annotation/            # @RequireAdmin 等
 │       │   ├── exception/             # 全局异常处理
-│       │   ├── config/                # Web / 静态资源配置
-│       │   └── utils/                 # JwtUtil 等工具
+│       │   ├── config/                # Web / 静态资源 / Redis 配置
+│       │   └── utils/                 # JwtUtil、编码识别、分章、缓存等工具
 │       └── resources/
 │           ├── application.yml        # 数据源等配置（支持环境变量覆盖）
 │           └── mapper/                # MyBatis XML
@@ -54,12 +55,13 @@ library_manager_system/
 │   └── src/
 │       ├── api/                       # 接口封装
 │       ├── components/ layout/ router/ store/ styles/ utils/
-│       └── views/                     # book / borrow / notice / user / login / register / profile / home
+│       └── views/                     # book / borrow / notice / user / reader / login / register / profile / home
 └── docs/                              # 设计、接口、建表、部署文档
     ├── api/                           # 各版本接口文档
     ├── sql/                           # 建表 + 初始化数据
     ├── plans/                         # 设计方案
     ├── deploy/                        # Nginx 部署配置
+    ├── test/                          # 编码识别用的测试文本（GBK / UTF-8）
     └── result/                        # 实现记录与后评估
 ```
 
@@ -73,6 +75,7 @@ library_manager_system/
 - Maven 3.9+
 - Node.js 18+
 - MySQL 8
+- **Redis 7+**（4.0 起后端接入 Redis 缓存，不启动会连不上，见下方第 1.5 步）
 
 ### 1. 初始化数据库
 
@@ -83,9 +86,22 @@ mysql -u root -p < docs/sql/01-v1.0-图书管理建表.sql
 mysql -u root -p < docs/sql/02-v1.0-新增10本图书.sql
 mysql -u root -p < docs/sql/02-v2.0-用户与登录建表.sql
 mysql -u root -p < docs/sql/03-v3.0-通知公告与借阅建表.sql
+mysql -u root -p < docs/sql/04-v4.0-在线阅读建表.sql
 ```
 
-> 数据库名默认 `library_system`，表：`book`、`book_category`、`sys_user`、`notice`、`notice_read`、`borrow_record`。
+> 数据库名默认 `library_system`，表：`book`、`book_category`、`sys_user`、`notice`、`notice_read`、`borrow_record`、`book_content`、`reader_file`、`reader_progress`。
+>
+> ⚠️ `04-v4.0-在线阅读建表.sql` 里有一句 `ALTER TABLE book ADD COLUMN readable`，MySQL 8.0 不支持 `IF NOT EXISTS`，**只能执行一次**。重复执行会报 `Duplicate column name 'readable'`，忽略即可（后面的建表语句照常有用）。
+
+### 1.5 启动 Redis
+
+4.0 起后端用 Redis 做图书列表缓存，**必须先起 Redis**，否则接口一调用就报连接异常（后端进程本身可能还能起来，因为 Lettuce 是懒连接）。
+
+```bash
+redis-server
+```
+
+Windows 上用 WSL、Docker 或直接跑 `redis-server.exe` 都可以，默认连 `localhost:6379`。
 
 ### 2. 启动后端
 
@@ -127,6 +143,10 @@ npm run dev
 | `DB_NAME` | `library_system` | 数据库名 |
 | `DB_USER` | `root` | 数据库账号 |
 | `DB_PASSWORD` | `123456` | 数据库密码 |
+| `REDIS_HOST` | `localhost` | Redis 地址 |
+| `REDIS_PORT` | `6379` | Redis 端口 |
+| `REDIS_PASSWORD` | `123456` | Redis 密码 |
+| `REDIS_DB` | `0` | Redis 库号 |
 | `JWT_SECRET` | 代码内占位密钥 | JWT 签名密钥，**至少 32 字节**，否则启动报错 |
 
 示例（PowerShell）：
@@ -157,8 +177,9 @@ mvn spring-boot:run
 | `04-v2.2-注销账号接口文档.md` | 注销账号 |
 | `05-v3.0-通知公告接口文档.md` | 公告 |
 | `06-v3.0-借阅归还接口文档.md` | 借阅、归还、续借 |
+| `07-v4.0-在线阅读接口文档.md` | 正文导入、章节目录、阅读进度、读者上传文件 |
 
-后端主要资源路径：`/auth/**`、`/books`、`/categories`、`/borrows`、`/notices`、`/users`。
+后端主要资源路径：`/auth/**`、`/books`、`/categories`、`/borrows`、`/notices`、`/users`、`/reader/**`。
 
 ---
 

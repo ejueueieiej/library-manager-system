@@ -1,4 +1,4 @@
-package org.libaray_manager_system.controller.Impl;
+package org.libaray_manager_system.controller.impl;
 
 import org.libaray_manager_system.annotation.RequireAdmin;
 import org.libaray_manager_system.pojo.Result;

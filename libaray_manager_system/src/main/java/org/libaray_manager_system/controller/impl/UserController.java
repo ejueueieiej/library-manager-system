@@ -1,4 +1,4 @@
-package org.libaray_manager_system.controller.Impl;
+package org.libaray_manager_system.controller.impl;
 
 import org.libaray_manager_system.annotation.RequireAdmin;
 import org.libaray_manager_system.pojo.Result;
@@ -6,7 +6,7 @@ import org.libaray_manager_system.pojo.dto.LoginDto;
 import org.libaray_manager_system.pojo.dto.UserDeleteDto;
 import org.libaray_manager_system.pojo.dto.UserSelectDto;
 import org.libaray_manager_system.pojo.entity.LoginUser;
-import org.libaray_manager_system.pojo.userpageResult;
+import org.libaray_manager_system.pojo.UserPageResult;
 import org.libaray_manager_system.pojo.vo.UserVo;
 import org.libaray_manager_system.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +33,7 @@ public class UserController {
     public Result GetUsers(UserSelectDto userSelectDto) {
         List<UserVo> userVos = userService.GetUsers(userSelectDto);
         Integer total = userService.GetUserCount();
-        userpageResult pageResult = new userpageResult(total, userVos);
+        UserPageResult pageResult = new UserPageResult(total, userVos);
         return new Result().success(pageResult);
     }
 

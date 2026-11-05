@@ -1,4 +1,4 @@
-package org.libaray_manager_system.pojo.Cache;
+package org.libaray_manager_system.pojo.cache;
 
 import lombok.Data;
 
