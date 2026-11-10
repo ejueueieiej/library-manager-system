@@ -43,6 +43,13 @@
           <span>我的书库</span>
         </router-link>
 
+        <div class="nav-label is-gap">智能</div>
+
+        <router-link to="/ai" class="nav-item" active-class="is-active">
+          <el-icon><ChatDotRound /></el-icon>
+          <span>AI 馆员</span>
+        </router-link>
+
         <div class="nav-label is-gap">借阅</div>
 
         <router-link to="/my-borrows" class="nav-item" active-class="is-active">
@@ -168,6 +175,8 @@ const crumbGroup = computed(() => {
     case 'userList':
     case 'profile':
       return '账号'
+    case 'aiChat':
+      return '智能'
     default:
       return ''
   }

@@ -87,6 +87,13 @@ const routes = [
         meta: { title: '我的书库' }
       },
       {
+        // 5.0：AI 馆员（当前为单轮对话，不存历史）
+        path: 'ai',
+        name: 'aiChat',
+        component: () => import('@/views/ai/AiChatView.vue'),
+        meta: { title: 'AI 馆员' }
+      },
+      {
         path: 'profile',
         name: 'profile',
         component: () => import('@/views/profile/ProfileView.vue'),

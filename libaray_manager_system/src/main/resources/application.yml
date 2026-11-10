@@ -24,7 +24,28 @@ spring:
     multipart:
       max-file-size: 10MB
       max-request-size: 12MB
-
+#  spring-ai配置
+  ai:
+    deepseek:
+      api-key: ${DEEPSEEK_LIBRARY_KEY:api-key}
+      base-url: ${DEEPSEEK_BASE_URL:https://api.deepseek.com}
+      chat:
+        model: ${DEEPSEEK_MODEL:deepseek-flash}
+        temperature: 0.7
+        max-tokens: 1024
+      mvc:
+        async:
+          # SSE 是异步请求，默认超时可能先于模型返回，必须放大
+          request-timeout: 200000
+library:
+  ai:
+    enabled: true
+    mock: false                # true = 不调真实模型，返回固定话术（答辩兜底）
+    model: ${DEEPSEEK_MODEL:deepseek-flash}   # 只用于展示/落库，与 spring.ai 那个保持同一个 env
+    tools-enabled: true        # 模型不支持工具调用时改 false
+    max-context-messages: 20   # 最多带多少条历史      max-context-chars: 6000    # 历史总字符预算
+    daily-quota: 100           # 每人每天最多问多少次
+    stream-timeout-ms: 180000  # 单次流式最长 3 分钟
 # mybatis 配置
 mybatis:
 # xml映射配置
