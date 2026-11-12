@@ -116,7 +116,7 @@ const suggestions = [
 const canSend = computed(() => !sending.value && draft.value.trim().length > 0)
 
 // 方案 C：后端 SSE 就绪后改成 true；出问题改回 false 立刻走 JSON 接口
-const USE_STREAM = false
+const USE_STREAM = true
 
 let controller = null
 let rafId = 0
