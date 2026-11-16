@@ -1,18 +1,13 @@
 import request, { TOKEN_KEY } from '@/utils/request'
 
-/**
- * 单轮问答（5.0 P0，非流式）
- *
- * 两个和普通接口不一样的地方：
- *   1. timeout 单独放大到 60s —— axios 实例默认 10s，模型生成经常超过；
- *   2. silent: true —— 错误提示由页面渲染在对话里，避免和全局 ElMessage 弹两次。
- */
-export function chat(content) {
-  return request.post('/ai/chat', { content }, { timeout: 60000, silent: true })
-}
+/* ---------------- 会话管理 ---------------- */
+export const listConversations = () => request.get('/ai/conversations')
+export const listMessages = (id) => request.get(`/ai/conversations/${id}/messages`)
+export const removeConversation = (id) => request.delete(`/ai/conversations/${id}`)
+export const renameConversation = (id, title) => request.put(`/ai/conversations/${id}`, { title })
 
 /**
- * 流式问答（5.0 P1，SSE）
+ * AI 对话（5.0 P1，SSE）
  *
  * 为什么不用 EventSource / axios：
  *   - EventSource 只能 GET，且不能自定义 Authorization 头；
@@ -25,7 +20,7 @@ export function chat(content) {
  *   done  -> { chars }
  *   error -> { msg }
  */
-export async function streamChat({ content, signal, onMeta, onDelta, onDone }) {
+export async function streamChat({ content, conversationId, signal, onMeta, onDelta, onDone }) {
   const token = localStorage.getItem(TOKEN_KEY)
   const resp = await fetch('/api/ai/chat/stream', {
     method: 'POST',
@@ -33,7 +28,7 @@ export async function streamChat({ content, signal, onMeta, onDelta, onDone }) {
       'Content-Type': 'application/json',
       ...(token ? { Authorization: 'Bearer ' + token } : {})
     },
-    body: JSON.stringify({ content }),
+    body: JSON.stringify({ content, conversationId }),
     signal
   })
 
@@ -45,6 +40,17 @@ export async function streamChat({ content, signal, onMeta, onDelta, onDone }) {
   if (!resp.ok) {
     throw new Error('AI 服务异常（HTTP ' + resp.status + '）')
   }
+
+  // 校验失败（空问题、AI 关闭等）时后端会返回 200 + JSON Result，
+  // 还没开始写 SSE，这里直接按业务错误抛，别当成“连接中断”
+  const contentType = resp.headers.get('content-type') || ''
+  if (contentType.includes('application/json')) {
+    const data = await resp.json().catch(() => null)
+    const err = new Error(data?.msg || 'AI 服务返回了错误')
+    err.code = data?.code
+    throw err
+  }
+
   if (!resp.body) {
     throw new Error('当前浏览器不支持流式响应')
   }

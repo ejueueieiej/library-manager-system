@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.libaray_manager_system.mapper.AiQueryMapper">
+<!-- 查询书籍 -->
+    <select id="SearchBooks" resultType="java.util.LinkedHashMap">
+        SELECT b.id            AS bookId,
+               b.name          AS bookName,
+               b.author        AS author,
+               b.isbn          AS isbn,
+               b.available_num AS availableNum,
+               b.total_num     AS totalNum
+        FROM book b
+        WHERE b.status = 1
+          AND (b.name LIKE CONCAT('%', #{kw}, '%')
+            OR b.author LIKE CONCAT('%', #{kw}, '%')
+            OR b.isbn LIKE CONCAT('%', #{kw}, '%'))
+        ORDER BY b.available_num DESC, b.id DESC
+        LIMIT #{limit}
+    </select>
+<!-- 查询用户当前借阅记录 -->
+    <select id="ListActiveBorrows" resultType="java.util.LinkedHashMap">
+        SELECT r.id          AS borrowId,
+               b.name        AS bookName,
+               b.author      AS author,
+               r.borrow_time AS borrowTime,
+               r.due_time    AS dueTime,
+               r.renew_count AS renewCount,
+               CASE WHEN r.due_time &lt; NOW() THEN 1 ELSE 0 END AS overdue
+        FROM borrow_record r
+                 JOIN book b ON b.id = r.book_id
+        WHERE r.user_id = #{userId}
+          AND r.status = 1
+        ORDER BY r.due_time ASC
+        LIMIT #{limit}
+    </select>
+
+
+</mapper>
